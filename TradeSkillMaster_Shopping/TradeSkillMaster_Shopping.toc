@@ -1,4 +1,4 @@
-## Interface: 50000
+## Interface: 30300
 ## Title: |cff00ff00TradeSkillMaster_Shopping|r
 ## Notes: Development addon for Sapu to do whatever he wants!
 ## Author: Sapu94

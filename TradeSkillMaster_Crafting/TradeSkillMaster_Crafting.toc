@@ -1,4 +1,4 @@
-﻿## Interface: 50000
+﻿## Interface: 30300
 ## Title: |cff00ff00TradeSkillMaster_Crafting|r
 ## Notes: Computes the profits of making various tradeskill crafts.
 ## Author: Sapu94

@@ -1,4 +1,4 @@
-﻿## Interface: 50000
+﻿## Interface: 30300
 ## Title: |cff00fe00TradeSkillMaster|r
 ## Notes: Core addon for the TradeSkillMaster suite. Does nothing without modules installed.
 ## Author: Sapu94

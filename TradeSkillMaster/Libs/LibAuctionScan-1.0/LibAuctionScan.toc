@@ -1,4 +1,4 @@
-## Interface: 40300
+## Interface: 30300
 ## Title: LibAuctionScan
 ## Notes: Manages the scanning of the auction house in a reliable an efficient manner.
 ## Author: Sapu94

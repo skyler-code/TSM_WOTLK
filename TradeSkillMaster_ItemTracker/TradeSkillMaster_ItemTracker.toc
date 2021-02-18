@@ -1,4 +1,4 @@
-## Interface: 50000
+## Interface: 30300
 ## Title: |cff00ff00TradeSkillMaster_ItemTracker|r
 ## Notes: Tracks inventory across multiple characters including bags, banks, guild banks, and auctions.
 ## Author: Sapu94

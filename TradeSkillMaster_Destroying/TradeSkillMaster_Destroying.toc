@@ -1,4 +1,4 @@
-## Interface: 50000
+## Interface: 30300
 ## Title: |cff00ff00TradeSkillMaster_Destroying|r
 ## Notes: Helps mill herbs and prospect ore at super speed! YAY!!
 ## Author: Geemoney
