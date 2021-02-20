@@ -7,7 +7,7 @@
 -- ------------------------------------------------------------------------------ --
 
 -- register this file with Ace Libraries
-local TSM = select(2, ...)
+local addonName, TSM = ...
 TSM = LibStub("AceAddon-3.0"):NewAddon(TSM, "TSM_Additions", "AceEvent-3.0", "AceConsole-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("TradeSkillMaster_Additions") -- loads the localization table
 TSM.version = GetAddOnMetadata("TradeSkillMaster_Additions","X-Curse-Packaged-Version") or GetAddOnMetadata("TradeSkillMaster_Additions", "Version") -- current version of the addon
@@ -16,6 +16,7 @@ local savedDBDefaults = {
 	global = {
 		enableAuctionSales = true,
 		enableVendorBuying = true,
+		enablePostingSpam = true,
 	},
 	char = {
 		auctionMessages = {},
@@ -43,8 +44,7 @@ function TSM:RegisterModule()
 	TSMAPI:RegisterReleasedModule("TradeSkillMaster_Additions", TSM.version, GetAddOnMetadata("TradeSkillMaster_Additions", "Author"),
 		GetAddOnMetadata("TradeSkillMaster_Additions", "Notes"), TSM.versionKey)
 		
-	TSMAPI:RegisterIcon("Additions", "Interface\\Icons\\Inv_Misc_Coin_08",
-		function(...) TSM.Options:Load(...) end, "TradeSkillMaster_Additions")
+	TSMAPI:RegisterIcon("Additions", "Interface\\Icons\\Inv_Misc_Coin_08", function(...) TSM.Options:Load(...) end, "TradeSkillMaster_Additions")
 end
 
 -- enable / disable features according to the options
@@ -60,4 +60,11 @@ function TSM:UpdateFeatureStates()
 	else
 		TSM.VendorBuying:Disable()
 	end
+
+	if TSM.db.global.enablePostingSpam then
+		TSM.PostSpamFilter:Enable()
+	else
+		TSM.PostSpamFilter:Disable()
+	end
+
 end

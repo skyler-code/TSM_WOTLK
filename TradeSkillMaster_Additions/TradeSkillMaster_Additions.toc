@@ -1,7 +1,7 @@
 ## Interface: 30300
 ## Title: |cff00ff00TradeSkillMaster_Additions|r
 ## Notes: Provides a handful of small quality of life features.
-## Author: Sapu94, Bart39
+## Author: Sapu94, Bart39, Brues
 ## Version: v2.0.1
 ## SavedVariables: TradeSkillMaster_AdditionsDB
 ## Dependency: TradeSkillMaster
@@ -22,6 +22,4 @@ Locale\zhTW.lua
 Locale\ptBR.lua
 
 TradeSkillMaster_Additions.lua
-Modules\Options.lua
-Modules\AuctionSales.lua
-Modules\VendorBuying.lua
+Modules\modules.xml

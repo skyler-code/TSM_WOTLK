@@ -74,6 +74,32 @@ function Options:DrawSettings(container)
 						},
 					},
 				},
+				{
+					type = "Spacer"
+				},
+				{
+					type = "InlineGroup",
+					layout = "Flow",
+					title = L["Post/Cancel Spam Filter"],
+					children = {
+						{
+							type = "Label",
+							text = L["Filters out the Auction created/cancelled spam."],
+							relativeWidth = 1,
+						},
+						{
+							type = "HeadingLine"
+						},
+						{
+							type = "CheckBox",
+							label = L["Enable Post/Cancel Spam Filter"],
+							relativeWidth = 1,
+							settingInfo = {TSM.db.global, "enablePostingSpam"},
+							quickCBInfo = {TSM.db.global, "enablePostingSpam"},
+							callback = TSM.UpdateFeatureStates,
+						},
+					},
+				},
 			},
 		},
 	}
