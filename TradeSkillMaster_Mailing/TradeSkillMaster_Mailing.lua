@@ -19,8 +19,6 @@ local L = LibStub("AceLocale-3.0"):GetLocale("TradeSkillMaster_Mailing") -- load
 
 local private = {lootIndex=1, recheckTime=1, allowTimerStart=true}
 
-local isMoP = select(4, GetBuildInfo()) >= 50000
-
 local savedDBDefaults = {
 	factionrealm = {
 		mailTargets = {},
@@ -69,11 +67,7 @@ function TSM:SetupOpenMailButton()
 	button:SetText(L["Open All"])
 	button:SetHeight(24)
 	button:SetWidth(130)
-	if isMoP then
-		button:SetPoint("BOTTOM", -20, 100)
-	else
-		button:SetPoint("BOTTOM", InboxFrame, "CENTER", -10, -165)
-	end
+	button:SetPoint("BOTTOM", InboxFrame, "CENTER", -10, -165)
 	button:SetScript("OnClick", function(self) private:StartAutoLooting() end)
 	private.button = button
 	
@@ -139,11 +133,7 @@ function TSM:SetupOpenMailButton()
 	private.cacheFrame.text:SetPoint("CENTER", MailFrame, "TOPLEFT", 40, -35)
 	
 	private.totalMail = MailFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-	if isMoP then
-		private.totalMail:SetPoint("TOPRIGHT", MailFrame, "TOPRIGHT", -20 + (foundOtherMailAddon and -24 or 0), -30)
-	else
-		private.totalMail:SetPoint("TOPRIGHT", MailFrame, "TOPRIGHT", -60 + (foundOtherMailAddon and -24 or 0), -18)
-	end
+	private.totalMail:SetPoint("TOPRIGHT", MailFrame, "TOPRIGHT", -60 + (foundOtherMailAddon and -24 or 0), -18)
 
 	TSM:RegisterEvent("MAIL_CLOSED")
 	TSM:RegisterEvent("MAIL_INBOX_UPDATE")

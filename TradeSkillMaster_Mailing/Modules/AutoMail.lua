@@ -15,8 +15,6 @@ local L = LibStub("AceLocale-3.0"):GetLocale("TradeSkillMaster_Mailing") -- load
 
 local private = {}
 
-local isMoP = select(4, GetBuildInfo()) >= 50000
-
 -- -------------------------------GUI FUNCTIONS-------------------------------
 
 function AutoMail:OnEnable()
@@ -37,11 +35,7 @@ function AutoMail:OnEnable()
 	button:SetScript("OnClick", function(self)
 			private:StartAutoMailing()
 		end)
-	if isMoP then
-		button:SetPoint("TOPLEFT", 55, 25)
-	else
-		button:SetPoint("TOPLEFT", 70, 13)
-	end
+	button:SetPoint("TOPLEFT", 70, 13)
 	button.tooltip = L["Runs TradeSkillMaster_Mailing's auto mailer, the last patch of mails will take ~10 seconds to send.\n\n[WARNING!] You will not get any confirmation before it starts to send mails, it is your own fault if you mistype your bankers name."]
 	private.button = button
 	

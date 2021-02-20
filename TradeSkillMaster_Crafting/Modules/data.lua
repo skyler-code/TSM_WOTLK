@@ -17,21 +17,8 @@ local L = LibStub("AceLocale-3.0"):GetLocale("TradeSkillMaster_Crafting") -- loa
 
 -- initialize all the data tables
 function Data:Initialize()
-	local shouldClear = false
-	if select(4, GetBuildInfo()) >= 50000 and not TSM.db.profile.updatedForMoP then
-		TSM.db.profile.updatedForMoP = true
-		shouldClear = true
-	end
-	
-	
 
 	for _, data in ipairs(TSM.tradeSkills) do
-		if shouldClear then
-			if TSM.db.profile[data.name] then
-				wipe(TSM.db.profile[data.name])
-				TSM.db.profile[data.name] = {}
-			end
-		end
 	
 		-- load all the crafts into Data.crafts
 		TSM.db.profile[data.name] = TSM.db.profile[data.name] or {}

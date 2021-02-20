@@ -23,13 +23,6 @@ local widths = {}
 local rowwidths = {}
 local rowends = {}
 
--- Determine if we're on WoW 4.0.6 or not.
-local wow_406
-do
-	local _,wow_build = GetBuildInfo()
-	wow_406 = tonumber(wow_build) >= 13596
-end
-
 --[[-----------------------------------------------------------------------------
 Support functions
 -------------------------------------------------------------------------------]]
@@ -46,11 +39,7 @@ end
 local function Tab_SetText(frame, text)
 	frame:_SetText(text)
 	local width = frame.obj.frame.width or frame.obj.frame:GetWidth() or 0
-	if wow_406 then
-		PanelTemplates_TabResize(frame, 0, nil, nil, width, frame:GetFontString():GetStringWidth())
-	else
-		PanelTemplates_TabResize(frame, 0, nil, width)
-	end
+	PanelTemplates_TabResize(frame, 0, nil, width)
 end
 
 local function Tab_SetSelected(frame, selected)
@@ -267,11 +256,7 @@ local methods = {
 			end
 			
 			for i = starttab, endtab do
-				if wow_406 then
-					PanelTemplates_TabResize(tabs[i], padding + 4, nil, nil, width, tabs[i]:GetFontString():GetStringWidth())
-				else
-					PanelTemplates_TabResize(tabs[i], padding + 4, nil, width)
-				end
+				PanelTemplates_TabResize(tabs[i], padding + 4, nil, width)
 			end
 			starttab = endtab + 1
 		end
