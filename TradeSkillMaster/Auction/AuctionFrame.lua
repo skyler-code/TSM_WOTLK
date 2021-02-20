@@ -322,7 +322,7 @@ function private:CreateSidebarButtons(parent)
 	local function OnShow(self)
 		self:UnlockHighlight()
 		if self.flag then
-			TSMAPI:CreateTimeDelay("auctionButtonClick", 0.01, function() self:GetScript("OnMouseUp")(self) end)
+			TSMAPI:CreateTimeDelay("auctionButtonClick", 0.01, function() self:GetScript("OnClick")(self) end)
 		end
 	end
 	
@@ -336,14 +336,16 @@ function private:CreateSidebarButtons(parent)
 		tinsert(buttonInfo, moduleButtons)
 	end
 	sort(buttonInfo, function(a, b) return a.module < b.module end)
-	
+
+	local k = 0
 	for i, moduleInfo in ipairs(buttonInfo) do
 		local frame = CreateSidebarButtonContainer(moduleInfo.module)
 		tinsert(buttonFrames, frame)
 		local buttons = {}
 		frame.buttons = buttons
 		for j, mode in ipairs(moduleInfo.modes) do
-			local btn = CreateFrame("Button", nil, frame)
+			k = k + 1
+			local btn = CreateFrame("Button", "feature"..k, frame)
 			tinsert(buttons, btn)
 			local highlight = btn:CreateTexture(nil, "HIGHLIGHT")
 			highlight:SetAllPoints()
@@ -367,10 +369,12 @@ function private:CreateSidebarButtons(parent)
 			label:SetHeight(18)
 			label:SetText(mode.buttonText)
 			btn:SetFontString(label)
-			btn:SetScript("OnMouseUp", function(self, button)
+			btn:SetScript("OnClick", function(self, button)
+					_G["isPostScan"] = nil
+					_G["isCancelScan"] = nil
 					UnlockAllHighlight()
 					self:LockHighlight()
-					private:OnSidebarButtonClick(mode, button)
+					private:OnSidebarButtonClick(mode, "LeftButton")
 				end)
 			btn:SetScript("OnEnter", function(self)
 					if mode.buttonDesc then
@@ -429,5 +433,5 @@ do
 end
 
 function private.Validate()
-	return TSM.db and tonumber(select(3, strfind(debugstack(), "([0-9]+)"))) == private.num
+	return TSM.db
 end

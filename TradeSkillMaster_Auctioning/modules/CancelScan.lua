@@ -21,7 +21,7 @@ function Cancel:GetScanListAndSetup(GUIRef, options)
 	-- setup stuff
 	GUI = GUIRef
 	options = options or {}
-	isScanning = true
+	self:ToggleScanning(true)
 	isCancelAll = options.cancelAll or options.cancelDuration or options.cancelFilter
 	cancelError = nil
 	wipe(cancelQueue)
@@ -158,7 +158,7 @@ function Cancel:ShouldCancel(index)
 		return
 	elseif isInvalidSeller or not lowestBuyout then
 		if isInvalidSeller then
-			TSM:Printf(L["Seller name of lowest auction for item %s was not returned from server. Skipping this item."], GetAuctionItemLink("owner", index))
+			-- TSM:Printf(L["Seller name of lowest auction for item %s was not returned from server. Skipping this item."], GetAuctionItemLink("owner", index))
 		else
 			TSM:Printf(L["Invalid scan data for item %s. Skipping this item."], GetAuctionItemLink("owner", index))
 		end
@@ -336,7 +336,7 @@ function Cancel:Stop(interrupted)
 		Cancel:UnregisterAllMessages()
 		wipe(currentItem)
 		totalToCancel, totalCanceled = 0, 0
-		isScanning = false
+		self:ToggleScanning(false)
 	else -- got an "item not found" so requeue ones that we missed
 		count = totalToCancel
 		cancelError = nil
@@ -354,7 +354,7 @@ function Cancel:Stop(interrupted)
 				tempList[itemString] = true
 			end
 		end
-		isScanning = false
+		self:ToggleScanning(false)
 		Cancel:UpdateItem()
 	end
 end
@@ -368,5 +368,12 @@ function Cancel:GetCurrentItem()
 end
 
 function Cancel:DoneScanning()
-	isScanning = false
+	self:ToggleScanning(false)
+end
+
+function Cancel:ToggleScanning(value)
+	isScanning = value
+	if value then
+		_G["isCancelScan"] = true
+	end
 end

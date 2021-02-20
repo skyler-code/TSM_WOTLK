@@ -65,7 +65,7 @@ end
 
 function TSM:SetupOpenMailButton()
 	-- Mass opening
-	local button = CreateFrame("Button", nil, InboxFrame, "UIPanelButtonTemplate")
+	local button = CreateFrame("Button", "TSMOpenAllMail", InboxFrame, "UIPanelButtonTemplate")
 	button:SetText(L["Open All"])
 	button:SetHeight(24)
 	button:SetWidth(130)
@@ -90,9 +90,6 @@ function TSM:SetupOpenMailButton()
 	if select(4, GetAddOnInfo("Postal")) == 1 then
 		button:Hide()
 		foundOtherMailAddon = true
-	end
-	if button:GetName() then
-		error("Stack overflow.", 2)
 	end
 
 	local noop = function() end
@@ -211,7 +208,7 @@ function private:StopAutoLooting(failed)
 	
 	--Tell user how much money has been collected if they don't have it turned off in TradeSkillMaster_Mailing options
 	if private.moneyCollected and private.moneyCollected > 0 and (not TSM.db.profile.dontDisplayMoneyCollected) then
-		TSM:Printf(L["%s Collected"], TSMAPI:FormatTextMoney(private.moneyCollected))
+		TSM:Printf(L["%s Collected"], GetCoinTextureString(private.moneyCollected))
 		private.moneyCollected = 0
 	end
 end
@@ -232,7 +229,7 @@ function TSM:UI_ERROR_MESSAGE(event, msg)
 			return
 		end
 		
-		TSMAPI:CreateTimeDelay("mailWaitDelay", 0.3, private.AutoLoot)
+		TSMAPI:CreateTimeDelay("mailWaitDelay", 0.1, private.AutoLoot)
 	end
 end
 

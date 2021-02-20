@@ -19,7 +19,7 @@ local isScanning, GUI
 function Post:GetScanListAndSetup(GUIRef, options)
 	-- setup stuff
 	GUI = GUIRef
-	isScanning = true
+	self:ToggleScanning(true)
 	wipe(postQueue)
 	wipe(currentItem)
 	totalToPost, totalPosted, count = 0, 0, 0
@@ -144,7 +144,7 @@ function Post:ShouldPost(item)
 	local buyout, bid, _, isWhitelist, isBlacklist, isPlayer, isInvalidSeller = TSM.Scan:GetLowestAuction(item.auctionItem)
 	
 	if isInvalidSeller then
-		TSM:Printf(L["Seller name of lowest auction for item %s was not returned from server. Skipping this item."], select(2, GetItemInfo(item.itemString)))
+		-- TSM:Printf(L["Seller name of lowest auction for item %s was not returned from server. Skipping this item."], select(2, GetItemInfo(item.itemString)))
 		return nil, "invalidSeller"
 	end
 	
@@ -437,7 +437,7 @@ function Post:Stop()
 	
 	wipe(currentItem)
 	totalToPost, totalPosted = 0, 0
-	isScanning = false
+	self:ToggleScanning(false)
 end
 
 function Post:GetAHGoldTotal()
@@ -478,5 +478,12 @@ function Post:EditPostPrice(itemString, buyout)
 end
 
 function Post:DoneScanning()
-	isScanning = false
+	self:ToggleScanning(false)
+end
+
+function Post:ToggleScanning(value)
+	isScanning = value
+	if value then
+		_G["isPostScan"] = true
+	end
 end
