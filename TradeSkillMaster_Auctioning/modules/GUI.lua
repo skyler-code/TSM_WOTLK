@@ -191,10 +191,10 @@ function private:CreateGroupSelectionScreen(parent)
 	sg.frame:Show()
 	frame.sg = sg
 	
-	TSMAPI.GUI:CreateVerticalLine(frame, frame:GetWidth() - 220, nil, true)
+	TSMAPI.GUI:CreateVerticalLine(frame, sg.frame:GetWidth() + 6, nil, true)
 	
 	local controlFrame = CreateFrame("Frame", nil, frame)
-	controlFrame:SetPoint("TOPLEFT", frame:GetWidth() - 220, 0)
+	controlFrame:SetPoint("TOPLEFT", sg.frame:GetWidth() + 6, 0)
 	controlFrame:SetPoint("BOTTOMRIGHT")
 	frame.controlFrame = controlFrame
 	
@@ -1224,9 +1224,11 @@ function private:Stopped(notDone)
 		TSMAPI:CreateTimeDelay("aucTotalGold", 0.5, SetGoldText)
 		SetGoldText()
 		private.statusBar:SetStatusText(L["Post Scan Finished"])
+		_G["isPostScan"] = nil
 	elseif private.mode == "Cancel" then
 		private.infoText:SetInfo(L["Done Canceling"])
 		private.statusBar:SetStatusText(L["Cancel Scan Finished"])
+		_G["isCancelScan"] = nil
 	elseif private.mode == "Reset" then
 		if not notDone then
 			private.infoText:SetInfo(L["No Items to Reset"])
