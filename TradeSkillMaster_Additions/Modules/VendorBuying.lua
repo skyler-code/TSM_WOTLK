@@ -7,9 +7,8 @@
 -- ------------------------------------------------------------------------------ --
 
 -- load the parent file (TSM) into a local variable and register this file as a module
-local TSM = select(2, ...)
+local addonName, TSM = ...
 local VendorBuying = TSM:NewModule("VendorBuying", "AceHook-3.0")
--- local L = LibStub("AceLocale-3.0"):GetLocale("TradeSkillMaster_Additions") -- loads the localization table
 
 function VendorBuying:OnEnable()
 	-- do enable stuff

@@ -8,9 +8,9 @@
 
 -- register this file with Ace Libraries
 local addonName, TSM = ...
-TSM = LibStub("AceAddon-3.0"):NewAddon(TSM, "TSM_Additions", "AceEvent-3.0", "AceConsole-3.0")
-local L = LibStub("AceLocale-3.0"):GetLocale("TradeSkillMaster_Additions") -- loads the localization table
-TSM.version = GetAddOnMetadata("TradeSkillMaster_Additions","X-Curse-Packaged-Version") or GetAddOnMetadata("TradeSkillMaster_Additions", "Version") -- current version of the addon
+TSM = LibStub("AceAddon-3.0"):NewAddon(TSM, addonName, "AceEvent-3.0", "AceConsole-3.0")
+local L = LibStub("AceLocale-3.0"):GetLocale(addonName) -- loads the localization table
+TSM.version = GetAddOnMetadata(addonName,"X-Curse-Packaged-Version") or GetAddOnMetadata(addonName, "Version") -- current version of the addon
 
 local savedDBDefaults = {
 	global = {
@@ -27,9 +27,9 @@ local savedDBDefaults = {
 -- Called once the player has loaded WOW.
 function TSM:OnInitialize()
 	-- load the savedDB into TSM.db
-	TSM.db = LibStub:GetLibrary("AceDB-3.0"):New("TradeSkillMaster_AdditionsDB", savedDBDefaults, true)
+	TSM.db = LibStub:GetLibrary("AceDB-3.0"):New(addonName.."DB", savedDBDefaults, true)
 	
-	for module in pairs(TSM.modules) do
+	for module, v in pairs(TSM.modules) do
 		TSM[module] = TSM.modules[module]
 	end
 	
@@ -41,30 +41,18 @@ end
 
 -- registers this module with TSM by first setting all fields and then calling TSMAPI:NewModule().
 function TSM:RegisterModule()
-	TSMAPI:RegisterReleasedModule("TradeSkillMaster_Additions", TSM.version, GetAddOnMetadata("TradeSkillMaster_Additions", "Author"),
-		GetAddOnMetadata("TradeSkillMaster_Additions", "Notes"), TSM.versionKey)
-		
-	TSMAPI:RegisterIcon("Additions", "Interface\\Icons\\Inv_Misc_Coin_08", function(...) TSM.Options:Load(...) end, "TradeSkillMaster_Additions")
+	TSMAPI:RegisterReleasedModule(addonName, TSM.version, GetAddOnMetadata(addonName, "Author"), GetAddOnMetadata(addonName, "Notes"), TSM.versionKey)
+	TSMAPI:RegisterIcon("Additions", "Interface\\Icons\\Inv_Misc_Coin_08", function(...) TSM.Options:Load(...) end, addonName)
 end
 
 -- enable / disable features according to the options
 function TSM:UpdateFeatureStates()
-	if TSM.db.global.enableAuctionSales then
-		TSM.AuctionSales:Enable()
-	else
-		TSM.AuctionSales:Disable()
+	for module in pairs(TSM.modules) do
+		if module == 'Options' then return end
+		if TSM.db.global['enable'..module] then
+			TSM[module]:Enable()
+		else
+			TSM[module]:Disable()
+		end
 	end
-	
-	if TSM.db.global.enableVendorBuying then
-		TSM.VendorBuying:Enable()
-	else
-		TSM.VendorBuying:Disable()
-	end
-
-	if TSM.db.global.enablePostingSpam then
-		TSM.PostSpamFilter:Enable()
-	else
-		TSM.PostSpamFilter:Disable()
-	end
-
 end
