@@ -15,30 +15,36 @@ do
 				for item, data in pairs(destroyingData[modes[i]][j]) do
 					if item ~= "desc" then
 						if not data.name then
+							TSMAPI:SetGameTooltip(item)
 							cacheComplete = false
 							data.name = GetItemInfo(item)
 						end
 						if modes[i] == "mill" then
 							if not GetItemInfo(data.pigment) then
+								TSMAPI:SetGameTooltip(data.pigment)
 								cacheComplete = false
 							end
 							for k=1, #data.herbs do
 								if not GetItemInfo(data.herbs[k].itemID) then
+									TSMAPI:SetGameTooltip(data.herbs[k].itemID)
 									cacheComplete = false
 								end
 							end
 						elseif modes[i] == "transform" then
 							if not GetItemInfo(data.otherItemID) then
+								TSMAPI:SetGameTooltip(data.otherItemID)
 								cacheComplete = false
 							end
 						elseif modes[i] == "prospect" then
 							for k=1, #data.gems do
 								if not GetItemInfo(data.gems[k]) then
+									TSMAPI:SetGameTooltip(data.gems[k])
 									cacheComplete = false
 								end
 							end
 							for k=1, #data.ore do
 								if not GetItemInfo(data.ore[k].itemID) then
+									TSMAPI:SetGameTooltip(data.ore[k].itemID)
 									cacheComplete = false
 								end
 							end
@@ -170,57 +176,23 @@ destroyingData.mill = {
 			pigment = 39343,
 			pigmentPerInk = 2,
 		},
-		[61978] = { -- Blackfallow Ink
-			name = GetItemInfo(61978) or GetSpellInfo(86004),
-			herbs = {
-				{itemID = 52983, pigmentPerMill = 2.5},
-				{itemID = 52984, pigmentPerMill = 2.5},
-				{itemID = 52985, pigmentPerMill = 2.5},
-				{itemID = 52986, pigmentPerMill = 2.5},
-				{itemID = 52987, pigmentPerMill = 3},
-				{itemID = 52988, pigmentPerMill = 3},
-			},
-			pigment = 61979,
-			pigmentPerInk = 2,
-		},
-		[79254] = { -- Ink of Dreams
-			name = GetItemInfo(79254) or GetSpellInfo(111645),
-			herbs = {
-				{itemID = 72237, pigmentPerMill = 2.5},
-				{itemID = 72234, pigmentPerMill = 2.5},
-				{itemID = 79010, pigmentPerMill = 2.5},
-				{itemID = 72235, pigmentPerMill = 3},
-				{itemID = 79011, pigmentPerMill = 3},
-			},
-			pigment = 79251,
-			pigmentPerInk = 2,
-		},
 	},
 	{
 		desc = L["Uncommon Inks"],
-		[61981] = { -- Inferno Ink
-			name = GetItemInfo(61981) or GetSpellInfo(86005),
+		[43127] = { -- Snowfall Ink
+			name = GetItemInfo(43127) or GetSpellInfo(57716),
 			herbs = {
-				{itemID = 52983, pigmentPerMill = 0.5},
-				{itemID = 52984, pigmentPerMill = 0.5},
-				{itemID = 52985, pigmentPerMill = 0.5},
-				{itemID = 52986, pigmentPerMill = 0.5},
-				{itemID = 52987, pigmentPerMill = 0.8},
-				{itemID = 52988, pigmentPerMill = 0.8},
+				{itemID = 36905, pigmentPerMill = 0.5},
+				{itemID = 36906, pigmentPerMill = 0.5},
+				{itemID = 36903, pigmentPerMill = 0.5},
+				{itemID = 39969, pigmentPerMill = 0.25},
+				{itemID = 39970, pigmentPerMill = 0.25},
+				{itemID = 36901, pigmentPerMill = 0.25},
+				{itemID = 36904, pigmentPerMill = 0.25},
+				{itemID = 36907, pigmentPerMill = 0.25},
+				{itemID = 37921, pigmentPerMill = 0.25},
 			},
-			pigment = 61980,
-			pigmentPerInk = 2,
-		},
-		[79255] = { -- Starlight Ink
-			name = GetItemInfo(79255) or GetSpellInfo(111646),
-			herbs = {
-				{itemID = 72237, pigmentPerMill = 0.5},
-				{itemID = 72234, pigmentPerMill = 0.5},
-				{itemID = 79010, pigmentPerMill = 0.5},
-				{itemID = 72235, pigmentPerMill = 0.8},
-				{itemID = 79011, pigmentPerMill = 0.8},
-			},
-			pigment = 79253,
+			pigment = 43109,
 			pigmentPerInk = 2,
 		},
 	},
@@ -271,27 +243,6 @@ destroyingData.prospect = {
 			gems = {36931, 36919, 36928, 36934, 36922, 36925},
 			ore = {
 				{itemID = 36910, gemPerProspect = 0.30},
-			},
-		},
-	},
-	{
-		desc = L["Cata Gems"],
-		[L["Cata - Green Quality"]] = {
-			name = L["Uncommon Gems"],
-			gems = {52182, 52180, 52178, 52179, 52177, 52181},
-			ore = {
-				{itemID = 53038, gemPerProspect = 1.488},
-				{itemID = 52185, gemPerProspect = 1.116},
-				{itemID = 52183, gemPerProspect = 1.02},
-			},
-		},
-		[L["Cata - Blue Quality"]] = {
-			name = L["Rare Gems"],
-			gems = {52192, 52193, 52190, 52195, 52194, 52191},
-			ore = {
-				{itemID = 53038, gemPerProspect = 0.072},
-				{itemID = 52185, gemPerProspect = 0.288},
-				{itemID = 52183, gemPerProspect = 0.4568},
 			},
 		},
 	},
@@ -560,81 +511,6 @@ destroyingData.disenchant  = {
 				},
 			},
 		},
-		[52555] = { -- Hypnotic Dust
-			name = GetItemInfo(52555),
-			minLevel = 77,
-			maxLevel = 85,
-			itemTypes = {
-				[ARMOR] = {
-					[2] = {
-						{
-							minItemLevel = 272,
-							maxItemLevel = 275,
-							amountOfMats = 1.125
-						},
-						{
-							minItemLevel = 276,
-							maxItemLevel = 290,
-							amountOfMats = 1.5
-						},
-						{
-							minItemLevel = 291,
-							maxItemLevel = 305,
-							amountOfMats = 1.875
-						},
-						{
-							minItemLevel = 306,
-							maxItemLevel = 315,
-							amountOfMats = 2.25
-						},
-						{
-							minItemLevel = 316,
-							maxItemLevel = 325,
-							amountOfMats = 2.625
-						},
-						{
-							minItemLevel = 333,
-							maxItemLevel = 400,
-							amountOfMats = 3
-						},
-					},
-				},
-				[WEAPON] = {
-					[2] = {
-						{
-							minItemLevel = 272,
-							maxItemLevel = 275,
-							amountOfMats = 0.375
-						},
-						{
-							minItemLevel = 276,
-							maxItemLevel = 290,
-							amountOfMats = 0.5
-						},
-						{
-							minItemLevel = 291,
-							maxItemLevel = 305,
-							amountOfMats = 0.625
-						},
-						{
-							minItemLevel = 306,
-							maxItemLevel = 315,
-							amountOfMats = 0.75
-						},
-						{
-							minItemLevel = 316,
-							maxItemLevel = 325,
-							amountOfMats = 0.875
-						},
-						{
-							minItemLevel = 326,
-							maxItemLevel = 400,
-							amountOfMats = 1
-						},
-					},
-				},
-			},
-		},
 	},
 	{
 		desc = L["Essences"],
@@ -895,81 +771,6 @@ destroyingData.disenchant  = {
 							minItemLevel = 152,
 							maxItemLevel = 200,
 							amountOfMats = 1.125
-						},
-					},
-				},
-			},
-		},
-		[52719] = { -- Greater Celestial Essence
-			name = GetItemInfo(52719),
-			minLevel = 77,
-			maxLevel = 85,
-			itemTypes = {
-				[ARMOR] = {
-					[2] = {
-						{
-							minItemLevel = 201,
-							maxItemLevel = 275,
-							amountOfMats = 0.125
-						},
-						{
-							minItemLevel = 276,
-							maxItemLevel = 290,
-							amountOfMats = 0.167
-						},
-						{
-							minItemLevel = 291,
-							maxItemLevel = 305,
-							amountOfMats = 0.208
-						},
-						{
-							minItemLevel = 306,
-							maxItemLevel = 315,
-							amountOfMats = 0.375
-						},
-						{
-							minItemLevel = 316,
-							maxItemLevel = 325,
-							amountOfMats = 0.625
-						},
-						{
-							minItemLevel = 326,
-							maxItemLevel = 400,
-							amountOfMats = 0.75
-						},
-					},
-				},
-				[WEAPON] = {
-					[2] = {
-						{
-							minItemLevel = 201,
-							maxItemLevel = 275,
-							amountOfMats = 0.375
-						},
-						{
-							minItemLevel = 276,
-							maxItemLevel = 290,
-							amountOfMats = 0.5
-						},
-						{
-							minItemLevel = 291,
-							maxItemLevel = 305,
-							amountOfMats = 0.625
-						},
-						{
-							minItemLevel = 306,
-							maxItemLevel = 315,
-							amountOfMats = 1.125
-						},
-						{
-							minItemLevel = 316,
-							maxItemLevel = 325,
-							amountOfMats = 1.875
-						},
-						{
-							minItemLevel = 326,
-							maxItemLevel = 400,
-							amountOfMats = 2.25
 						},
 					},
 				},
@@ -1451,41 +1252,6 @@ destroyingData.disenchant  = {
 				},
 			},
 		},
-		[52721] = { -- Heavenly Shard
-			name = GetItemInfo(52721),
-			minLevel = 78,
-			maxLevel = 85,
-			itemTypes = {
-				[ARMOR] = {
-					[3] = {
-						{
-							minItemLevel = 201,
-							maxItemLevel = 316,
-							amountOfMats = 0.33
-						},
-						{
-							minItemLevel = 317,
-							maxItemLevel = 400,
-							amountOfMats = 1
-						},
-					},
-				},
-				[WEAPON] = {
-					[3] = {
-						{
-							minItemLevel = 201,
-							maxItemLevel = 316,
-							amountOfMats = 0.33
-						},
-						{
-							minItemLevel = 317,
-							maxItemLevel = 400,
-							amountOfMats = 1
-						},
-					},
-				},
-			},
-		},
 	},
 	{
 		desc = L["Crystals"],
@@ -1584,47 +1350,12 @@ destroyingData.disenchant  = {
 				},
 			},
 		},
-		[52722] = { -- Maelstrom Crystal 
-			name = GetItemInfo(52722),
-			minLevel = 85,
-			maxLevel = 85,
-			itemTypes = {
-				[ARMOR] = {
-					[4] = {
-						{
-							minItemLevel = 300,
-							maxItemLevel = 400,
-							amountOfMats = 1.000
-						},
-					},
-				},
-				[WEAPON] = {
-					[4] = {
-						{
-							minItemLevel = 285,
-							maxItemLevel = 400,
-							amountOfMats = 1.000
-						},
-					},
-				},
-			},
-		},
 	},
 }
 
 destroyingData.transform = {
 	{
 		desc = L["Essences"],
-		[52719] = { -- Greater Celestial Essence
-			name = GetItemInfo(52719) or GetSpellInfo(74186),
-			otherItemID = 52718,
-			numNeeded = 3,
-		},
-		[52718] = { -- Lesser Celestial Essence
-			name = GetItemInfo(52718) or GetSpellInfo(74187),
-			otherItemID = 52719,
-			numNeeded = 1/3,
-		},
 		[34055] = { -- Greater Cosmic Essence
 			name = GetItemInfo(34055) or GetSpellInfo(44123),
 			otherItemID = 34056,
@@ -1698,11 +1429,6 @@ destroyingData.transform = {
 	},
 	{
 		desc = L["Shards"],
-		[52721] = { -- Heavenly Shard
-			name = GetItemInfo(52721),
-			otherItemID = 52720,
-			numNeeded = 3,
-		},
 		[34052] = { -- Dream Shard
 			name = GetItemInfo(34052),
 			otherItemID = 34053,
@@ -1814,53 +1540,48 @@ destroyingData.transform = {
 
 destroyingData.vendorTrades = {
 	[37101] = { -- Ivory Ink
-		matID = 79254,
-		mat = destroyingData.mill[1][79254],
+		matID = 43126,
+		mat = destroyingData.mill[1][43126],
 		num = 1,
 	},
 	[39469] = { -- Moonglow Ink
-		matID = 79254,
-		mat = destroyingData.mill[1][79254],
+		matID = 43126,
+		mat = destroyingData.mill[1][43126],
 		num = 1,
 	},
 	[39774] = { -- Midnight Ink
-		matID = 79254,
-		mat = destroyingData.mill[1][79254],
+		matID = 43126,
+		mat = destroyingData.mill[1][43126],
 		num = 1,
 	},
 	[43116] = { -- Lion's Ink
-		matID = 79254,
-		mat = destroyingData.mill[1][79254],
+		matID = 43126,
+		mat = destroyingData.mill[1][43126],
 		num = 1,
 	},
 	[43118] = { -- Jadefire Ink
-		matID = 79254,
-		mat = destroyingData.mill[1][79254],
+		matID = 43126,
+		mat = destroyingData.mill[1][43126],
 		num = 1,
 	},
 	[43120] = { -- Celestial Ink
-		matID = 79254,
-		mat = destroyingData.mill[1][79254],
+		matID = 43126,
+		mat = destroyingData.mill[1][43126],
 		num = 1,
 	},
 	[43122] = { -- Shimmering Ink
-		matID = 79254,
-		mat = destroyingData.mill[1][79254],
+		matID = 43126,
+		mat = destroyingData.mill[1][43126],
 		num = 1,
 	},
 	[43124] = { -- Ethereal Ink
-		matID = 79254,
-		mat = destroyingData.mill[1][79254],
+		matID = 43126,
+		mat = destroyingData.mill[1][43126],
 		num = 1,
 	},
-	[43126] = { -- Ink of the Sea
-		matID = 79254,
-		mat = destroyingData.mill[1][79254],
-		num = 1,
-	},
-	[61981] = { -- Inferno Ink
-		matID = 79254,
-		mat = destroyingData.mill[1][79254],
+	[43127] = { -- Snowfall Ink
+		matID = 43126,
+		mat = destroyingData.mill[1][43126],
 		num = 10,
 	},
 }
@@ -1877,7 +1598,7 @@ destroyingData.notDisenchantable = {
 
 function TSMAPI:GetDestroyingConversionNum(mode, targetID, matID)
 	local altID, altNeeded
-	if destroyingData.vendorTrades[targetID] and targetID ~= 61981 then -- Inferno Ink is special
+	if destroyingData.vendorTrades[targetID] and targetID ~= 43127 then -- Inferno Ink is special
 		altNeeded = destroyingData.vendorTrades[targetID].num
 		altID = destroyingData.vendorTrades[targetID].matID
 	end

@@ -284,8 +284,11 @@ local itemsToCache = {}
 local function UpdateCache()
 	local maxIndex = min(#itemsToCache, 100)
 	for i=maxIndex, 1, -1 do
-		if GetItemInfo(itemsToCache[i]) then
+		local item = itemsToCache[i];
+		if GetItemInfo(item) then
 			tremove(itemsToCache, i)
+		else
+			lib:SetGameTooltip(item)
 		end
 	end
 	
@@ -297,7 +300,9 @@ end
 function lib:GetItemInfoCache(items, isKey)
 	if isKey then
 		for item in pairs(items) do
-			tinsert(itemsToCache, item)
+			if tonumber(item) then
+				tinsert(itemsToCache, item)
+			end
 		end
 	else
 		for _, item in ipairs(items) do
@@ -308,4 +313,8 @@ function lib:GetItemInfoCache(items, isKey)
 	if #itemsToCache > 0 then
 		lib:CreateTimeDelay("TSMItemInfoCache", 1, UpdateCache, 0.2)
 	end
+end
+
+function lib:SetGameTooltip(itemId)
+	GameTooltip:SetHyperlink("item:"..itemId..":0:0:0:0:0:0:0")
 end

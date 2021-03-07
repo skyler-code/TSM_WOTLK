@@ -26,13 +26,13 @@ local debug = function(...) TSM:Debug(...) end -- for debugging
 
 -- determines if the player is a scribe
 function Inscription:HasProfession()
-	local professionIDs = {45357, 45358, 45359, 45360, 45361, 45363, 86008}
+	local professionIDs = {45357, 45358, 45359, 45360, 45361, 45363}
 	for _, id in pairs(professionIDs) do
 		if IsSpellKnown(id) then return true end
 	end
 end
 
-local inkLookup = {[79254]=1, [61978]=2, [43126]=3, [43124]=4, [43122]=5, [43120]=6, [43118]=7, [43116]=8, [39774]=9}
+local inkLookup = { [43126]=1, [43124]=2, [43122]=3, [43120]=4, [43118]=5, [43116]=6, [39774]=7}
 function Inscription:GetSlot(itemID, mats)
 	if not itemID then return end
 	

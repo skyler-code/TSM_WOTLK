@@ -186,7 +186,7 @@ local professionFilters = {
 		},
 		items = {
 			3391, -- Elixir
-			34052, 11178, 52555, 34054, 11083, 11137, -- Enchanting
+			34052, 11178, 34054, 11083, 11137, -- Enchanting
 			27860, -- Food & Drink
 			6149, 3827, -- Potion
 			18335, 11754, -- Quest
