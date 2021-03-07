@@ -367,7 +367,7 @@ function Destroying:StartNewSearch(automaticData, parent)
 	local used, scanQueue = {}, {}
 	for i=1, #tempQueue do
 		local uniqueString = tempQueue[i].name or tempQueue[i].uniqueString
-		if not used[uniqueString] then
+		if uniqueString and not used[uniqueString] then
 			used[uniqueString] = true
 			tinsert(scanQueue, tempQueue[i])
 		end
