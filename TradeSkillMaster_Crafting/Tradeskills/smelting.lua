@@ -10,11 +10,11 @@
 
 
 -- load the parent file (TSM) into a local variable and register this file as a module
-local TSM = select(2, ...)
-local L = LibStub("AceLocale-3.0"):GetLocale("TradeSkillMaster_Crafting") -- loads the localization table
+local addonName, TSM = ...
+local L = LibStub("AceLocale-3.0"):GetLocale(addonName) -- loads the localization table
 local Smelting = TSM:NewModule("Smelting", "AceEvent-3.0")
 
--- determines if the player is an leatherworkers
+-- determines if the player is a smelter
 function Smelting:HasProfession()
 	local professionIDs = {2656}
 	for _, id in pairs(professionIDs) do
@@ -54,8 +54,4 @@ Smelting.slot = {
 	[36913]=1, -- Bars
 	[37663]=1, -- Bars
 	[41163]=1, -- Bars
-	[54849]=1, -- Bars
-	[53039]=1, -- Bars
-	[52186]=1, -- Bars
-	[51950]=1, -- Bars
 }

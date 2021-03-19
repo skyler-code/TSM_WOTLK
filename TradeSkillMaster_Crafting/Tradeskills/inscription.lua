@@ -18,8 +18,8 @@
 
 
 -- load the parent file (TSM) into a local variable and register this file as a module
-local TSM = select(2, ...)
-local L = LibStub("AceLocale-3.0"):GetLocale("TradeSkillMaster_Crafting") -- loads the localization table
+local addonName, TSM = ...
+local L = LibStub("AceLocale-3.0"):GetLocale(addonName) -- loads the localization table
 local Inscription = TSM:NewModule("Inscription", "AceEvent-3.0")
 
 local debug = function(...) TSM:Debug(...) end -- for debugging
@@ -116,7 +116,7 @@ function Inscription:GetSlotList()
 	return Inscription["slotList"..tableNum]
 end
 
-Inscription.slotList1 = {L["Ink of Dreams"], L["Blackfallow Ink"], L["Ink of the Sea"], L["Ethereal Ink"], L["Shimmering Ink"], L["Celestial Ink"], L["Jadefire Ink"],
+Inscription.slotList1 = {L["Ink of the Sea"], L["Ethereal Ink"], L["Shimmering Ink"], L["Celestial Ink"], L["Jadefire Ink"],
 	L["Lion's Ink"], L["Midnight Ink"], L["Inks"], L["Scrolls"], L["Armor"], L["Other"]}
 
 Inscription.slotList2 = {L["Inks"], L["Scrolls"], L["Armor"], L["Other"]}
@@ -130,18 +130,6 @@ do
 end
 
 Inscription.inks = CopyTable(TSMAPI.DestroyingData.mill[1])
-Inscription.inks[61981] = { -- Inferno Ink
-	herbs = {
-		{itemID = 52983, pigmentPerMill = 0.5},
-		{itemID = 52984, pigmentPerMill = 0.5},
-		{itemID = 52985, pigmentPerMill = 0.5},
-		{itemID = 52986, pigmentPerMill = 0.5},
-		{itemID = 52987, pigmentPerMill = 0.8},
-		{itemID = 52988, pigmentPerMill = 0.8},
-	},
-	pigment = 61980,
-	pigmentPerInk = 2,
-}
 Inscription.inks[43115] = { -- hunter's ink
 	herbs = {
 		{itemID = 785, pigmentPerMill = 0.25},

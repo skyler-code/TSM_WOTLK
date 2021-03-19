@@ -18,15 +18,15 @@
 
 
 -- load the parent file (TSM) into a local variable and register this file as a module
-local TSM = select(2, ...)
-local L = LibStub("AceLocale-3.0"):GetLocale("TradeSkillMaster_Crafting") -- loads the localization table
+local addonName, TSM = ...
+local L = LibStub("AceLocale-3.0"):GetLocale(addonName) -- loads the localization table
 local Cooking = TSM:NewModule("Cooking", "AceEvent-3.0")
 
 local debug = function(...) TSM:Debug(...) end -- for debugging
 
 -- determines if the player is an tailor
 function Cooking:HasProfession()
-	local professionIDs = {2550, 3102, 3413, 18260, 33359, 51296, 88053}
+	local professionIDs = {2550, 3102, 3413, 18260, 33359, 51296}
 	for _, id in pairs(professionIDs) do
 		if IsSpellKnown(id) then return true end
 	end

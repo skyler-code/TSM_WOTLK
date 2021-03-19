@@ -18,8 +18,8 @@
 
 
 -- load the parent file (TSM) into a local variable and register this file as a module
-local TSM = select(2, ...)
-local L = LibStub("AceLocale-3.0"):GetLocale("TradeSkillMaster_Crafting") -- loads the localization table
+local addonName, TSM = ...
+local L = LibStub("AceLocale-3.0"):GetLocale(addonName) -- loads the localization table
 local Jewelcrafting = TSM:NewModule("Jewelcrafting", "AceEvent-3.0")
 
 local debug = function(...) TSM:Debug(...) end -- for debugging
