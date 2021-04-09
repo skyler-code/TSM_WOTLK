@@ -34,6 +34,7 @@ function Config:Load(parent)
 			elseif value == 2 then
 				Config:LoadOptions(self)
 			end
+			tabGroup.children[1]:DoLayout()
 		end)
 	simpleGroup:AddChild(tabGroup)
 	tabGroup:SelectTab(1)
@@ -76,6 +77,12 @@ local viewerColInfo = {
 		comparesort = ColSortMethod,
 	},
 	{
+		name = L["Mailbox"],
+		width = 0.1,
+		defaultsort = "dsc",
+		comparesort = ColSortMethod,
+	},
+	{
 		name = L["Guild Bank"],
 		width = 0.1,
 		defaultsort = "dsc",
@@ -110,7 +117,7 @@ local function GetSTData()
 	local items, rowData = {}, {}
 	
 	local function AddItem(itemID, key, quantity)
-		items[itemID] = items[itemID] or {total=0, bags=0, bank=0, guild=0, auctions=0}
+		items[itemID] = items[itemID] or {total=0, bags=0, bank=0, guild=0, auctions=0, mail=0}
 		items[itemID].total = items[itemID].total + quantity
 		items[itemID][key] = items[itemID][key] + quantity
 	end
@@ -123,17 +130,13 @@ local function GetSTData()
 			for itemID, quantity in pairs(TSM.Data:GetPlayerBank(name) or {}) do
 				AddItem(itemID, "bank", quantity)
 			end
+			for itemID, quantity in pairs(TSM.Data:GetPlayerMail(name) or {}) do
+				AddItem(itemID, "mail", quantity)
+			end
 			for itemID, quantity in pairs(TSM.Data:GetPlayerAuctions(name) or {}) do
 				if tonumber(itemID) then
 					AddItem(itemID, "auctions", quantity)
 				end
-			end
-		end
-	end
-	for name, selected in pairs(filters.guilds) do
-		if selected then
-			for itemID, quantity in pairs(TSM.Data:GetGuildBank(name) or {}) do
-				AddItem(itemID, "guild", quantity)
 			end
 		end
 	end
@@ -154,7 +157,7 @@ local function GetSTData()
 							value = data.bank
 						},
 						{
-							value = data.guild
+							value = data.mail
 						},
 						{
 							value = data.auctions
@@ -178,10 +181,6 @@ function Config:LoadInventoryViewer(parent)
 	for name in pairs(TSM.characters) do
 		playerList[name] = name
 		filters.characters[name] = true
-	end
-	for name in pairs(TSM.guilds) do
-		guildList[name] = name
-		filters.guilds[name] = true
 	end
 	
 	local page = {
@@ -212,18 +211,6 @@ function Config:LoadInventoryViewer(parent)
 						end,
 				},
 				{
-					type = "Dropdown",
-					label = L["Guilds"],
-					relativeWidth = 0.3,
-					list = guildList,
-					value = filters.guilds,
-					multiselect = true,
-					callback = function(_,_,key,value)
-							filters.guilds[key] = value
-							viewerST:SetData(GetSTData())
-						end,
-				},
-				{
 					type = "SimpleGroup",
 					fullHeight = true,
 					layout = "Flow",
@@ -234,7 +221,7 @@ function Config:LoadInventoryViewer(parent)
 	}
 	
 	TSMAPI:BuildPage(parent, page)
-
+	
 	
 	-- scrolling table
 	local colInfo = GetColInfo(parent.frame:GetWidth())
@@ -269,27 +256,21 @@ function Config:LoadInventoryViewer(parent)
 			for name, data in pairs(TSM.characters) do
 				local bags = data.bags[itemID] or 0
 				local bank = data.bank[itemID] or 0
+				local mail = data.mail[itemID] or 0
 				local auctions = data.auctions[itemID] or 0
+				local total = bags + bank + auctions + mail
 				
-				local totalText = "|cffffffff"..(bags+bank+auctions).."|r"
 				local bagText = "|cffffffff"..bags.."|r"
 				local bankText = "|cffffffff"..bank.."|r"
+				local mailText = "|cffffffff"..mail.."|r"
 				local auctionText = "|cffffffff"..auctions.."|r"
+				local totalText = "|cffffffff"..total.."|r"
 			
-				if (bags + bank + auctions) > 0 then
-					GameTooltip:AddLine(format(L["%s: %s (%s in bags, %s in bank, %s on AH)"], name, totalText, bagText, bankText, auctionText), 1, 1, 0)
+				if total > 0 then
+					GameTooltip:AddLine(format(L["%s: %s (%s in bags, %s in bank, %s on AH, %s in mail)"], name, totalText, bagText, bankText, auctionText, mailText), 1, 1, 0)
 				end
 			end
-			
-			for name, data in pairs(TSM.guilds) do
-				local gbank = data.items[itemID] or 0
-				
-				local gbankText = "|cffffffff"..(gbank).."|r"
-			
-				if gbank > 0 then
-					GameTooltip:AddLine(format(L["%s: %s in guild bank"], name, gbankText))
-				end
-			end
+
 			GameTooltip:Show()
 		end,
 		["OnLeave"] = function()

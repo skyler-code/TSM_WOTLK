@@ -22,6 +22,10 @@ function Comm:OnEnable()
 	Comm:RegisterComm("TSMITEM_DATA")
 end
 
+function TSMDoSync()
+	Comm:DoSync()
+end
+
 function Comm:DoSync()
 	local friends = {}
 	
@@ -34,7 +38,7 @@ function Comm:DoSync()
 	for name in pairs(TSM.db.factionrealm.charactersToSync) do
 		if not friends[name] then
 			if GetNumFriends() == 50 then
-				TSM:Printf(L["Could not sync with %s since they are not on your friends list and you friends list is full."], name)
+				TSM:Printf(L["Could not sync with %s since they are not on your friends list and your friends list is full."], name)
 			else
 				AddFriend(name)
 			end
@@ -57,7 +61,10 @@ function Comm:DoSync()
 end
 
 function Comm:SendInventoryData(target, shouldReturnData)
-	local data = {TSM.characters, TSM.guilds, shouldReturnData}
+	local data = {CopyTable(TSM.characters), shouldReturnData}
+	for _, playerData in pairs(data[1]) do
+		playerData.mailInfo = {}
+	end
 	local msg = Comm:Serialize(data)
 	local compressedMsg = LibCompress:Compress(msg)
 	local encodedMsg = compressTable:Encode(compressedMsg)
@@ -87,19 +94,30 @@ function Comm:OnCommReceived(_, msg, _, sender)
 	
 	
 	if isValid then
-		local numChars, numGuilds = 0, 0
+		local numChars = 0
 		for name, characterData in pairs(data[1]) do
-			TSM.characters[name] = CopyTable(characterData)
 			numChars = numChars + 1
+			if not TSM.characters[name] then
+				TSM.characters[name] = characterData
+			else
+				if (TSM.characters[name].lastUpdate or 0) < (characterData.lastUpdate or 0) then
+					local keys = {"bags", "bank", "auctions", "guild", "lastUpdate"}
+					for _, key in ipairs(keys) do
+						TSM.characters[name][key] = characterData[key]
+					end
+				end
+				if (TSM.characters[name].lastMailUpdate or 0) < (characterData.lastMailUpdate or 0) then
+					local keys = {"mail", "lastMailUpdate"}
+					for _, key in ipairs(keys) do
+						TSM.characters[name][key] = characterData[key]
+					end
+				end
+			end
 		end
 		
-		for name, guildData in pairs(data[2]) do
-			TSM.guilds[name] = CopyTable(guildData)
-			numGuilds = numGuilds + 1
-		end
-		TSM:Printf(L["Successfully got %s bytes of ItemTracker data from %s! Updated %s characters and %s guilds."], #serializedMsg, sender, numChars, numGuilds)
+		TSM:Printf(L["Successfully got %s bytes of ItemTracker data from %s! Updated %s characters."], #serializedMsg, sender, numChars)
 	
-		if data[3] then
+		if data[2] then
 			Comm:SendInventoryData(sender)
 		end
 	else

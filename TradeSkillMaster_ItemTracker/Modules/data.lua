@@ -11,7 +11,7 @@
 
 -- load the parent file (TSM) into a local variable and register this file as a module
 local TSM = select(2, ...)
-local Data = TSM:NewModule("Data", "AceEvent-3.0")
+local Data = TSM:NewModule("Data", "AceEvent-3.0", "AceHook-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("TradeSkillMaster_ItemTracker")
 
 local CURRENT_PLAYER, CURRENT_GUILD = UnitName("player"), GetGuildInfo("player")
@@ -23,19 +23,16 @@ function Data:Initialize()
 	Data:RegisterEvent("BAG_UPDATE", "EventHandler")
 	Data:RegisterEvent("BANKFRAME_OPENED", "EventHandler")
 	Data:RegisterEvent("PLAYERBANKSLOTS_CHANGED", "EventHandler")
-	Data:RegisterEvent("GUILDBANKFRAME_OPENED", "EventHandler")
-	Data:RegisterEvent("GUILDBANKBAGSLOTS_CHANGED", "EventHandler")
 	Data:RegisterEvent("AUCTION_OWNED_LIST_UPDATE", "EventHandler")
 	
 	TSMAPI:RegisterData("playerlist", Data.GetPlayers)
 	TSMAPI:RegisterData("guildlist", Data.GetGuilds)
 	TSMAPI:RegisterData("playerbags", Data.GetPlayerBags)
 	TSMAPI:RegisterData("playerbank", Data.GetPlayerBank)
-	TSMAPI:RegisterData("guildbank", Data.GetGuildBank)
+	TSMAPI:RegisterData("playermail", Data.GetPlayerMail)
 	TSMAPI:RegisterData("playerauctions", Data.GetPlayerAuctions)
 	TSMAPI:RegisterData("totalplayerauctions", Data.GetAuctionsTotal)
 	TSMAPI:RegisterData("playertotal", Data.GetPlayerTotal)
-	TSMAPI:RegisterData("guildtotal", Data.GetGuildTotal)
 	
 	CURRENT_PLAYER, CURRENT_GUILD = UnitName("player"), GetGuildInfo("player")
 	Data:StoreCurrentGuildInfo()
@@ -75,6 +72,7 @@ function Data:StoreCurrentGuildInfo(noDelay)
 		guildThrottle:Hide()
 	end
 	TSM.characters[CURRENT_PLAYER].guild = CURRENT_GUILD
+	TSM.characters[CURRENT_PLAYER].lastUpdate = time()
 end
 
 function Data:ThrottleEvent(event)
@@ -109,17 +107,6 @@ function Data:EventHandler(event, fire)
 			Data:GetBagData()
 		elseif event == "PLAYERBANKSLOTS_CHANGED" or event == "BANKFRAME_OPENED" then
 			Data:GetBankData()
-		elseif event == "GUILDBANKFRAME_OPENED" then
-			-- Query all tabs of the gbank to ensure all tabs will be scanned.
-			local initialTab = GetCurrentGuildBankTab()
-			for tab=1, GetNumGuildBankTabs() do
-				if select(5, GetGuildBankTabInfo(tab)) > 0 or IsGuildLeader(UnitName("player")) then
-					QueryGuildBankTab(tab)
-				end
-			end
-			QueryGuildBankTab(initialTab)
-		elseif event == "GUILDBANKBAGSLOTS_CHANGED" then
-			Data:GetGuildBankData()
 		elseif event == "AUCTION_OWNED_LIST_UPDATE" then
 			Data:ScanPlayerAuctions()
 		end
@@ -138,6 +125,7 @@ function Data:GetBagData()
 			end
 		end
 	end
+	TSM.characters[CURRENT_PLAYER].lastUpdate = time()
 end
 
 -- scan the player's bank
@@ -161,8 +149,7 @@ function Data:GetBankData()
 		ScanBankBag(bag)
 	end
 	ScanBankBag(-1)
-	
-	Data:SendMessage("TSMBANK", locationList)
+	TSM.characters[CURRENT_PLAYER].lastUpdate = time()
 end
 
 local gFrame = CreateFrame("Frame")
@@ -177,44 +164,18 @@ gFrame:SetScript("OnUpdate", function(self, elapsed)
 	end
 end)
 
--- scan the guild bank
-function Data:GetGuildBankData()
-	if not CURRENT_GUILD then
-		Data:StoreCurrentGuildInfo(true)
-		if not CURRENT_GUILD then return end
-	end
-	wipe(TSM.guilds[CURRENT_GUILD].items)
-	
-	local locationList = {}
-	for tab=1, GetNumGuildBankTabs() do
-		if select(5, GetGuildBankTabInfo(tab)) > 0 or IsGuildLeader(UnitName("player")) then
-			for slot=1, MAX_GUILDBANK_SLOTS_PER_TAB or 98 do
-				local itemID = TSMAPI:GetItemID(GetGuildBankItemLink(tab, slot))
-				if itemID then
-					locationList[itemID] = locationList[itemID] or {}
-					local quantity = select(2, GetGuildBankItemInfo(tab, slot))
-					TSM.guilds[CURRENT_GUILD].items[itemID] = (TSM.guilds[CURRENT_GUILD].items[itemID] or 0) + quantity
-					tinsert(locationList[itemID], {tab=tab, slot=slot, quantity=quantity})
-				end
-			end
-		end
-	end
-	
-	gFrame:Show()
-	gFrame.locationList = locationList
-end
-
 function Data:ScanPlayerAuctions()
 	wipe(TSM.characters[CURRENT_PLAYER].auctions)
 	TSM.characters[CURRENT_PLAYER].auctions.time = time()
 	
 	for i=1, GetNumAuctionItems("owner") do
 		local itemID = TSMAPI:GetItemID(GetAuctionItemLink("owner", i))
-		local _, _, quantity, _, _, _, _, _, _, _, _, _, wasSold = GetAuctionItemInfo("owner", i)
+		local _, _, quantity, _, _, _, _, _, _, _, _, _, _, wasSold = GetAuctionItemInfo("owner", i)
 		if wasSold == 0 and itemID then
 			TSM.characters[CURRENT_PLAYER].auctions[itemID] = (TSM.characters[CURRENT_PLAYER].auctions[itemID] or 0) + quantity
 		end
 	end
+	TSM.characters[CURRENT_PLAYER].lastUpdate = time()
 end
 
 
@@ -252,6 +213,13 @@ function Data:GetPlayerBank(player)
 	return TSM.characters[player].bank
 end
 
+function Data:GetPlayerMail(player)
+	player = player or CURRENT_PLAYER
+	if not player or not TSM.characters[player] then return end
+	
+	return TSM.characters[player].mail
+end
+
 function Data:GetGuildBank(guild)
 	guild = guild or CURRENT_GUILD
 	if not guild or not TSM.guilds[guild] then return end
@@ -268,7 +236,7 @@ function Data:GetPlayerAuctions(player)
 	
 	if (time() - lastScanTime) < (48*60*60) then
 		return TSM.characters[player].auctions
-	end -- make sure the data isn't old
+	end
 end
 
 function Data:GetPlayerTotal(itemID)
@@ -278,23 +246,17 @@ function Data:GetPlayerTotal(itemID)
 		if name == CURRENT_PLAYER then
 			playerTotal = playerTotal + (data.bags[itemID] or 0)
 			playerTotal = playerTotal + (data.bank[itemID] or 0)
+			playerTotal = playerTotal + (data.mail[itemID] or 0)
 		else
 			altTotal = altTotal + (data.bags[itemID] or 0)
 			altTotal = altTotal + (data.bank[itemID] or 0)
+			altTotal = altTotal + (data.mail[itemID] or 0)
 		end
 	end
 	
 	return playerTotal, altTotal
 end
 
-function Data:GetGuildTotal(itemID)
-	local guildTotal = 0
-	for _, data in pairs(TSM.guilds) do
-		guildTotal = guildTotal + (data.items[itemID] or 0)
-	end
-	
-	return guildTotal
-end
 
 function Data:GetAuctionsTotal(itemID)
 	local auctionsTotal = 0
@@ -303,4 +265,137 @@ function Data:GetAuctionsTotal(itemID)
 	end
 	
 	return auctionsTotal
+end
+
+
+-- ***************************************************************************
+-- MAIL TRACKING FUNCTIONS
+-- ***************************************************************************
+function Data:UpdateMailQuantities(player)
+	local data = TSM.characters[player]
+	wipe(data.mail)
+	for link, count in pairs(data.mailInfo) do
+		local itemID = TSMAPI:GetItemID(link)
+		data.mail[itemID] = (data.mail[itemID] or 0) + count
+	end
+	TSM.characters[player].lastMailUpdate = time()
+end
+
+do
+	local tmpBuyouts = {}
+	local function hookFunc(listType, index, bidPlaced)
+		local link = GetAuctionItemLink(listType, index)
+		local name, _, count, _, _, _, _, _, _, buyout = GetAuctionItemInfo(listType, index)
+		if bidPlaced == buyout then
+			tinsert(tmpBuyouts, {name=name, link=link, count=count})
+		end
+	end
+	local function hookFunc2(index)
+		local link = GetAuctionItemLink("owner", index)
+		local count = select(3, GetAuctionItemInfo("owner", index))
+		local mailInfo = TSM.characters[CURRENT_PLAYER].mailInfo
+		mailInfo[link] = (mailInfo[link] or 0) + count
+		Data:UpdateMailQuantities(CURRENT_PLAYER)
+	end
+	local function hookFunc3(index, itemIndex)
+		local player = TSM.characters[CURRENT_PLAYER]
+		for itemIndex=(itemIndex or 1), (itemIndex or ATTACHMENTS_MAX_RECEIVE) do
+			local link = GetInboxItemLink(index, itemIndex)
+			if link then
+				if player.mailInfo[link] then
+					player.mailInfo[link] = player.mailInfo[link] - select(3, GetInboxItem(index, itemIndex))
+					if player.mailInfo[link] <= 0 then
+						player.mailInfo[link] = nil
+					end
+				end
+			end
+		end
+	end
+	local function hookFunc4(target)
+		local altName
+		for name in pairs(TSM.characters) do
+			if strlower(name) == strlower(target) then
+				altName = name
+				break
+			end
+		end
+		if not altName then return end
+		for i=1, 16 do
+			local link = GetSendMailItemLink(i)
+			if link then
+				local count = select(3, GetSendMailItem(i))
+				TSM.characters[altName].mailInfo[link] = (TSM.characters[altName].mailInfo[link] or 0) + count
+			end
+		end
+		Data:UpdateMailQuantities(altName)
+	end
+	local function hookFunc5(index)
+		local sender = select(3, GetInboxHeaderInfo(index))
+		local target = TSM.characters[sender]
+		local player = TSM.characters[CURRENT_PLAYER]
+		if not target then return end
+		for itemIndex=1, ATTACHMENTS_MAX_RECEIVE do
+			local link = GetInboxItemLink(index, itemIndex)
+			if link then
+				target.mailInfo[link] = (target.mailInfo[link] or 0) + select(3, GetInboxItem(index, itemIndex))
+				if player.mailInfo[link] then
+					player.mailInfo[link] = player.mailInfo[link] - select(3, GetInboxItem(index, itemIndex))
+					if player.mailInfo[link] <= 0 then
+						player.mailInfo[link] = nil
+					end
+				end
+			end
+		end
+		Data:UpdateMailQuantities(sender)
+		Data:UpdateMailQuantities(CURRENT_PLAYER)
+	end
+	
+	local function onChatMsg(_, msg)
+		if msg:match(gsub(ERR_AUCTION_WON_S, "%%s", "")) then
+			while #tmpBuyouts > 0 do
+				local info = CopyTable(tmpBuyouts[1])
+				tremove(tmpBuyouts, 1)
+				if msg == format(ERR_AUCTION_WON_S, info.name) then
+					local mailInfo = TSM.characters[CURRENT_PLAYER].mailInfo
+					mailInfo[info.link] = (mailInfo[info.link] or 0) + info.count
+					Data:UpdateMailQuantities(CURRENT_PLAYER)
+					break
+				end
+			end
+		end
+	end
+	
+	local function onMailUpdate()
+		local player = TSM.characters[CURRENT_PLAYER]
+		local numItems, totalItems = GetInboxNumItems()
+		if numItems == totalItems then
+			wipe(player.mailInfo)
+		end
+		local newInfo = {}
+		for i=1, numItems do
+			if select(8, GetInboxHeaderInfo(i)) then
+				for j=1, ATTACHMENTS_MAX_RECEIVE do
+					local link = GetInboxItemLink(i, j)
+					if link then
+						if not player.mailInfo[link] then
+							newInfo[link] = (newInfo[link] or 0) + select(3, GetInboxItem(i, j))
+						end
+					end
+				end
+			end
+		end
+		for link, count in pairs(newInfo) do
+			player.mailInfo[link] = count
+		end
+		Data:UpdateMailQuantities(CURRENT_PLAYER)
+	end
+
+	Data:RegisterEvent("CHAT_MSG_SYSTEM", onChatMsg)
+	Data:RegisterEvent("MAIL_INBOX_UPDATE", onMailUpdate)
+	Data:Hook("PlaceAuctionBid", hookFunc, true)
+	Data:Hook("CancelAuction", hookFunc2, true)
+	Data:Hook("TakeInboxItem", hookFunc3, true)
+	Data:Hook("AutoLootMailItem", hookFunc3, true)
+	Data:Hook("SendMail", hookFunc4, true)
+	Data:Hook("ReturnInboxItem", hookFunc5, true)
 end

@@ -19,9 +19,9 @@ if not L then return end
 
 L["trackerMessage"] = true
 L["If you previously used TSM_Gathering, note that inventory data was not transfered to TSM_ItemTracker and will not show up until you log onto each character and visit the bank / gbank / auction house."] = true
-L["ItemTracker: %s on player, %s on alts, %s in guild banks, %s on AH"] = true
-L["%s: %s (%s in bags, %s in bank, %s on AH)"] = true
-L["%s: %s in guild bank"] = true
+L["ItemTracker: %s on player, %s on alts, %s on AH"] = true
+L["%s: %s (%s in bags, %s in bank, %s on AH, %s in mail)"] = true
+L["ItemTracker Data (%s item(s) total):"] = true
 
 -- config.lua
 
@@ -30,6 +30,7 @@ L["Options"] = true
 L["Item Name"] = true
 L["Bags"] = true
 L["Bank"] = true
+L["Mailbox"] = true
 L["Guild Bank"] = true
 L["AH"] = true
 L["Total"] = true
@@ -54,5 +55,5 @@ L["Could not sync with %s since they are not on your friends list and you friend
 L["Sending data to %s complete!"] = true
 L["Compressing and sending ItemTracker data to %s. This will take approximately %s seconds. Please wait..."] = true
 L["Ignored ItemTracker data from %s since you haven't added him to the list of characters in this character's ItemTracker options. You'll only see this message once per session per sender."] = true
-L["Successfully got %s bytes of ItemTracker data from %s! Updated %s characters and %s guilds."] = true
+L["Successfully got %s bytes of ItemTracker data from %s! Updated %s characters."] = true
 L["Got invalid ItemTracker data from %s."] = true

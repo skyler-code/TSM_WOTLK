@@ -10,12 +10,13 @@
 
 
 -- register this file with Ace Libraries
-local TSM = select(2, ...)
-TSM = LibStub("AceAddon-3.0"):NewAddon(TSM, "TradeSkillMaster_ItemTracker", "AceEvent-3.0", "AceConsole-3.0")
-local L = LibStub("AceLocale-3.0"):GetLocale("TradeSkillMaster_ItemTracker")
+local addonName, TSM = ...
+TSM = LibStub("AceAddon-3.0"):NewAddon(TSM, addonName, "AceEvent-3.0", "AceConsole-3.0")
+local L = LibStub("AceLocale-3.0"):GetLocale(addonName)
 
-TSM.version = GetAddOnMetadata("TradeSkillMaster_ItemTracker","X-Curse-Packaged-Version") or GetAddOnMetadata("TradeSkillMaster_ItemTracker", "Version") -- current version of the addon
+TSM.version = GetAddOnMetadata(addonName,"X-Curse-Packaged-Version") or GetAddOnMetadata(addonName, "Version") -- current version of the addon
 TSM.versionKey = 2
+TSM.simpleModuleName = GetAddOnMetadata(addonName, "X-TSM-Module-Name")
 
 -- default values for the savedDB
 local savedDBDefaults = {
@@ -41,10 +42,15 @@ local characterDefaults = { -- anything added to the characters table will have 
 	bank = {},
 	auctions = {},
 	guild = nil,
+	mail = {},
+	mailInfo = {},
+	lastUpdate = nil,
+	lastUpdateMail = nil,
 }
 local guildDefaults = {
 	items = {},
 	characters = {},
+	lastUpdate = nil,
 }
 
 -- Called once the player has loaded into the game
@@ -56,49 +62,45 @@ function TSM:OnInitialize()
 	end
 	
 	-- load the saved variables table into TSM.db
-	TSM.db = LibStub:GetLibrary("AceDB-3.0"):New("TradeSkillMaster_ItemTrackerDB", savedDBDefaults, true)
+	TSM.db = LibStub:GetLibrary("AceDB-3.0"):New(addonName.."DB", savedDBDefaults, true)
 	TSM.characters = TSM.db.factionrealm.characters
 	TSM.guilds = TSM.db.factionrealm.guilds
 	
-	if not next(TSM.characters) then
-		TSMAPI:CreateTimeDelay(L["trackerMessage"], 1, function() TSM:Print(L["If you previously used TSM_Gathering, note that inventory data was not transfered to TSM_ItemTracker and will not show up until you log onto each character and visit the bank / gbank / auction house."]) end)
-	end
-	
 	-- register the module with TSM
-	TSMAPI:RegisterReleasedModule("TradeSkillMaster_ItemTracker", TSM.version, GetAddOnMetadata("TradeSkillMaster_ItemTracker", "Author"),
-		GetAddOnMetadata("TradeSkillMaster_ItemTracker", "Notes"), TSM.versionKey)
+	TSMAPI:RegisterReleasedModule(addonName, TSM.version, GetAddOnMetadata(addonName, "Author"), GetAddOnMetadata(addonName, "Notes"), TSM.versionKey)
 		
-	TSMAPI:RegisterIcon("ItemTracker", "Interface\\Icons\\INV_Misc_Gem_Variety_01",
-		function(...) TSM.Config:Load(...) end, "TradeSkillMaster_ItemTracker")
-		
-	if not TSM.characters[UnitName("player")] then
-		TSM.characters[UnitName("player")] = characterDefaults
+	TSMAPI:RegisterIcon(self.simpleModuleName, "Interface\\Icons\\INV_Misc_Gem_Variety_01", function(...) TSM.Config:Load(...) end, addonName)
+	
+	local playerName, guildName = UnitName("player"), GetGuildInfo("player")
+	if not TSM.characters[playerName] then
+		TSM.characters[playerName] = characterDefaults
 	end
-	if GetGuildInfo("player") and not TSM.guilds[GetGuildInfo("player")] then
-		TSM.guilds[GetGuildInfo("player")] = guildDefaults
+	TSM.characters[playerName].account = TSM.db.global.accountId
+	if guildName and not TSM.guilds[guildName] then
+		TSM.guilds[guildName] = guildDefaults
 	end
 	
 	TSM.Data:Initialize()
-	TSM.Comm:DoSync()
+	--TSM.Comm:DoSync()
 	
 	if TSM.db.profile.tooltip ~= "hide" then
-		TSMAPI:RegisterTooltip("TradeSkillMaster_ItemTracker", function(...) return TSM:LoadTooltip(...) end)
+		TSMAPI:RegisterTooltip(addonName, function(...) return TSM:LoadTooltip(...) end)
 	end
 	
 	local itemIDs = {}
 	for _, data in pairs(TSM.characters) do
+		data.mail = data.mail or characterDefaults.mail
+		data.mailInfo = data.mailInfo or characterDefaults.mailInfo
 		for itemID in pairs(data.bags) do
 			itemIDs[itemID] = true
 		end
 		for itemID in pairs(data.bank) do
 			itemIDs[itemID] = true
 		end
-		for itemID in pairs(data.auctions) do
+		for itemID in pairs(data.mail) do
 			itemIDs[itemID] = true
 		end
-	end
-	for _, data in pairs(TSM.guilds) do
-		for itemID in pairs(data.items) do
+		for itemID in pairs(data.auctions) do
 			itemIDs[itemID] = true
 		end
 	end
@@ -106,43 +108,40 @@ function TSM:OnInitialize()
 end
 
 function TSM:LoadTooltip(itemID)
+	local text = {}
+	local grandTotal = 0
+
 	if TSM.db.profile.tooltip == "simple" then
 		local player, alts = TSM.Data:GetPlayerTotal(itemID)
-		local guild = TSM.Data:GetGuildTotal(itemID)
 		local auctions = TSM.Data:GetAuctionsTotal(itemID)
-		local text = format(L["ItemTracker: %s on player, %s on alts, %s in guild banks, %s on AH"], "|cffffffff"..player.."|r", "|cffffffff"..alts.."|r", "|cffffffff"..guild.."|r", "|cffffffff"..auctions.."|r")
-		
-		return {text}
+		grandTotal = grandTotal + player + alts + auctions
+		tinsert(text, format("  "..L["ItemTracker: %s on player, %s on alts, %s on AH"], "|cffffffff"..player.."|r", "|cffffffff"..alts.."|r", "|cffffffff"..auctions.."|r"))
 	elseif TSM.db.profile.tooltip == "full" then
-		local text = {}
-		
 		for name, data in pairs(TSM.characters) do
 			local bags = data.bags[itemID] or 0
 			local bank = data.bank[itemID] or 0
 			local auctions = data.auctions[itemID] or 0
+			local mail = data.mail[itemID] or 0
+			local total = bags + bank + auctions + mail
+			grandTotal = grandTotal + total
 			
-			local totalText = "|cffffffff"..(bags+bank+auctions).."|r"
 			local bagText = "|cffffffff"..bags.."|r"
 			local bankText = "|cffffffff"..bank.."|r"
 			local auctionText = "|cffffffff"..auctions.."|r"
+			local mailText = "|cffffffff"..mail.."|r"
+			local totalText = "|cffffffff"..total.."|r"
 		
-			if (bags + bank + auctions) > 0 then
-				tinsert(text, format(L["%s: %s (%s in bags, %s in bank, %s on AH)"], name, totalText, bagText, bankText, auctionText))
+			if total > 0 then
+				tinsert(text, format("  "..L["%s: %s (%s in bags, %s in bank, %s on AH, %s in mail)"], name, totalText, bagText, bankText, auctionText, mailText))
 			end
 		end
-		
-		for name, data in pairs(TSM.guilds) do
-			local gbank = data.items[itemID] or 0
-			
-			local gbankText = "|cffffffff"..(gbank).."|r"
-		
-			if gbank > 0 then
-				tinsert(text, format(L["%s: %s in guild bank"], name, gbankText))
-			end
-		end
-		
-		return text
 	end
+
+	if #text > 0 then
+		tinsert(text, 1, format(L["ItemTracker Data (%s item(s) total):"], "|cffffffff"..grandTotal.."|r"))
+	end
+	
+	return text
 end
 
 -- Make sure the item isn't soulbound
