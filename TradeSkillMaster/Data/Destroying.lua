@@ -1539,46 +1539,46 @@ destroyingData.transform = {
 }
 
 destroyingData.vendorTrades = {
-	[37101] = { -- Ivory Ink
-		matID = 43126,
-		mat = destroyingData.mill[1][43126],
-		num = 1,
-	},
-	[39469] = { -- Moonglow Ink
-		matID = 43126,
-		mat = destroyingData.mill[1][43126],
-		num = 1,
-	},
-	[39774] = { -- Midnight Ink
-		matID = 43126,
-		mat = destroyingData.mill[1][43126],
-		num = 1,
-	},
-	[43116] = { -- Lion's Ink
-		matID = 43126,
-		mat = destroyingData.mill[1][43126],
-		num = 1,
-	},
-	[43118] = { -- Jadefire Ink
-		matID = 43126,
-		mat = destroyingData.mill[1][43126],
-		num = 1,
-	},
-	[43120] = { -- Celestial Ink
-		matID = 43126,
-		mat = destroyingData.mill[1][43126],
-		num = 1,
-	},
-	[43122] = { -- Shimmering Ink
-		matID = 43126,
-		mat = destroyingData.mill[1][43126],
-		num = 1,
-	},
-	[43124] = { -- Ethereal Ink
-		matID = 43126,
-		mat = destroyingData.mill[1][43126],
-		num = 1,
-	},
+	-- [37101] = { -- Ivory Ink
+	-- 	matID = 43126,
+	-- 	mat = destroyingData.mill[1][43126],
+	-- 	num = 1,
+	-- },
+	-- [39469] = { -- Moonglow Ink
+	-- 	matID = 43126,
+	-- 	mat = destroyingData.mill[1][43126],
+	-- 	num = 1,
+	-- },
+	-- [39774] = { -- Midnight Ink
+	-- 	matID = 43126,
+	-- 	mat = destroyingData.mill[1][43126],
+	-- 	num = 1,
+	-- },
+	-- [43116] = { -- Lion's Ink
+	-- 	matID = 43126,
+	-- 	mat = destroyingData.mill[1][43126],
+	-- 	num = 1,
+	-- },
+	-- [43118] = { -- Jadefire Ink
+	-- 	matID = 43126,
+	-- 	mat = destroyingData.mill[1][43126],
+	-- 	num = 1,
+	-- },
+	-- [43120] = { -- Celestial Ink
+	-- 	matID = 43126,
+	-- 	mat = destroyingData.mill[1][43126],
+	-- 	num = 1,
+	-- },
+	-- [43122] = { -- Shimmering Ink
+	-- 	matID = 43126,
+	-- 	mat = destroyingData.mill[1][43126],
+	-- 	num = 1,
+	-- },
+	-- [43124] = { -- Ethereal Ink
+	-- 	matID = 43126,
+	-- 	mat = destroyingData.mill[1][43126],
+	-- 	num = 1,
+	-- },
 	[43127] = { -- Snowfall Ink
 		matID = 43126,
 		mat = destroyingData.mill[1][43126],
@@ -1598,7 +1598,7 @@ destroyingData.notDisenchantable = {
 
 function TSMAPI:GetDestroyingConversionNum(mode, targetID, matID)
 	local altID, altNeeded
-	if destroyingData.vendorTrades[targetID] and targetID ~= 43127 then -- Inferno Ink is special
+	if destroyingData.vendorTrades[targetID] and targetID ~= 43127 then -- Snowfall Ink is special
 		altNeeded = destroyingData.vendorTrades[targetID].num
 		altID = destroyingData.vendorTrades[targetID].matID
 	end
