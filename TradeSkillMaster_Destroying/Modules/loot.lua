@@ -55,7 +55,7 @@ local function OnEvent()
     if autoLoot == 1 then SetCVar( "autoLootDefault", 1 ) end
     local obj = TSM.GUI:getInfo()
     if obj.frame and obj.frame:IsVisible() then 
-        if obj.action == "disenchanting" then
+        if obj.action == "disenchant" then
             TSM.stDE:updateTable(obj.frame, obj.action, obj.filter) 
         else
             TSM.stDestroying:updateTable(obj.frame, obj.action, obj.filter) 
@@ -71,7 +71,7 @@ lootEvent:SetScript("OnEvent", OnEvent)
 lootEvent:SetScript("OnHide", OnHide)
 
 function loot:setAction(action)
-    if action == "Disenchanting" then results = TSM.db.factionrealm.DE return end
+    if action == "Disenchant" then results = TSM.db.factionrealm.DE return end
     if action == "Prospecting"   then results = TSM.db.factionrealm.Prospecting return end
     if action == "Milling"       then results = TSM.db.factionrealm.Milling return end
 end

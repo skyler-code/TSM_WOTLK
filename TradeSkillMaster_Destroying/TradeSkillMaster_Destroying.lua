@@ -78,6 +78,24 @@ end
 
 function TSM:getDestroyBtn() TSM.destroybtn:Show() end
 
+--Professions--
+local PROFESSION_IDS = {
+    31252, --Prospecting
+    13262, --Disenchant
+    51005, --Milling
+}
+function TSM:GetSpells()
+	local t = {}
+    for k,v in pairs(PROFESSION_IDS) do
+        if IsSpellKnown(v) then
+            local name = GetSpellInfo(v)
+            tinsert(t, name)
+        end
+    end
+    return t
+end
+
+
 function TSM:IsDestroyable(bag, slot, action)
 
 	local slotID = tostring(bag) .. tostring(slot)
@@ -113,7 +131,7 @@ do
 
 	local prospecting = 31252
 	local milling = 51005
-	local disenchanting = 13262
+	local disenchant = 13262
 
 	local Type, Version = "TSMFastDestroyButton", 2
 	if not AceGUI or (AceGUI:GetWidgetVersion(Type) or 0) >= Version then return end
@@ -274,13 +292,13 @@ do
 		["SetSpell"] = function(self, spell)
 			if not spell then self.spell = nil; return end
             spell = strlower(spell or "")
-            assert(spell == "milling" or spell == "prospecting" or spell == "disenchanting", "Invalid spell name: "
-            ..spell..". Expected \"Milling\" or \"Prospecting\" or \"Disenchanting\"")
+            assert(spell == "milling" or spell == "prospecting" or spell == "disenchant", "Invalid spell name: "
+            ..spell..". Expected \"Milling\" or \"Prospecting\" or \"Disenchant\"")
 			
 			--to fix localizationg problem--F
 			if (spell == "prospecting") then spell = GetSpellInfo (prospecting) end
 			if (spell == "milling") then spell = GetSpellInfo (milling) end
-			if (spell == "disenchanting") then spell = GetSpellInfo (disenchanting) end
+			if (spell == "disenchant") then spell = GetSpellInfo (disenchant) end
 
 			self.spell = spell
 		end,

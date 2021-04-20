@@ -20,13 +20,13 @@ L["Destroying"] = true
 L["Enabled"] = true
 -- Gui.lua
 L["Prospecting"] = true
-L["Disenchanting"] =true
+L["Disenchant"] =true
 L["Milling"] = true
 
 L["Sum Loot (Uncheck if do not wish to display loot)"] =true
 L["Displays the destroy button"] = true
 
-L["You do not know Milling, Prospecting or Disenchanting."] = true
+L["You do not know Milling, Prospecting or Disenchant."] = true
 L["The Destroyer has risen!"] = true
 
 L["Config"] = true

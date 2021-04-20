@@ -20,7 +20,7 @@ local AceGUI = LibStub("AceGUI-3.0") -- load the AceGUI libraries
 --Professions--
 local prospecting = 31252
 local milling = 51005
-local disenchanting = 13262
+local disenchant = 13262
 
 local Obj = {
     frame = nil,
@@ -31,8 +31,8 @@ local Obj = {
 
 local function getSpells()
 	local t = {}
-    if IsSpellKnown(disenchanting) then
-		t["Disenchanting"] = L["Disenchanting"]
+    if IsSpellKnown(disenchant) then
+		t["Disenchant"] = L["Disenchant"]
 	end
 	if IsSpellKnown(milling) then
 		t["Milling"] = L["Milling"]
@@ -54,6 +54,7 @@ local Spacer =
 
 local rTable = nil
 local function drawConfigUI (container)
+    local spellTable = TSM:GetSpells() 
     local page = 
     {
 		{
@@ -85,7 +86,7 @@ local function drawConfigUI (container)
                 {	--Prospecting DD
                     type = "Dropdown",
                     relativeWidth = 0.5,
-                    list =  getSpells(),
+                    list =  spellTable,
                     value = current,
                     callback =	function(this, event, item) rTable = item end			
                 }, 	-- End Prospecting DD
@@ -93,18 +94,17 @@ local function drawConfigUI (container)
                     type = "Button",
                     text = L["Clear Results Table"],
                     relativeWidth = .5,
-                    callback = function()  
-                        if rTable == "Prospecting" then
+                    callback = function()
+                        local prof = spellTable[rTable]
+                        if not prof then return end
+                        if prof == "Prospecting" then
                             TSM.db.factionrealm.Prospecting = {Day = {},Mat = {}}
-                            TSM:Print(L[rTable]..L[" Table has been cleared"])
-                        elseif rTable == "Milling" then
+                        elseif prof == "Milling" then
                             TSM.db.factionrealm.Milling = {Day = {},Mat = {}}
-                            TSM:Print(L[rTable]..L[" Table has been cleared"])
-                        elseif rTable == "Disenchanting" then
+                        elseif prof == "Disenchant" then
                             TSM.db.factionrealm.DE = {Day = {},Mat = {}}
-                            TSM:Print(L[rTable]..L[" Table has been cleared"])
                         end
-                       
+                        TSM:Print(L[prof]..L[" Table has been cleared"])
                     end			
                 }, 	--button
             }--end childern
@@ -203,8 +203,8 @@ function GUI:Load(parent)
 	local select
 	
 	--find which spells are known--
-    if IsSpellKnown(disenchanting) then
-		table.insert(tabGroupTable, {text=L["Disenchanting"], value=3} )
+    if IsSpellKnown(disenchant) then
+		table.insert(tabGroupTable, {text=L["Disenchant"], value=3} )
 		select = 3
 	end
 	if IsSpellKnown(milling) then
@@ -240,7 +240,7 @@ function GUI:Load(parent)
                 Obj.action = "milling"
                 Obj.filter = "mats"
 			elseif value == 3 then --DE
-                Obj.action = "disenchanting"
+                Obj.action = "disenchant"
                 Obj.filter = "mats"
             elseif value == 4 then --config
                 drawConfigUI (self)
