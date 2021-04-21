@@ -140,7 +140,14 @@ local equivItems = {
 	{lower=16202, upper=16203, ratio=3}, -- Lesser/Greater Eternal Essence
 	{lower=22447, upper=22446, ratio=3}, -- Lesser/Greater Planar Essence
 	{lower=34056, upper=34055, ratio=3}, -- Lesser/Greater Cosmic Essence
+	{lower=37700, upper=36523, ratio=10}, -- Crystallized/Eternal Air
+	{lower=37701, upper=35624, ratio=10}, -- Crystallized/Eternal Earth
+	{lower=37702, upper=36860, ratio=10}, -- Crystallized/Eternal Fire
+	{lower=37703, upper=35627, ratio=10}, -- Crystallized/Eternal Shadow
+	{lower=37704, upper=35625, ratio=10}, -- Crystallized/Eternal Life
+	{lower=37705, upper=35622, ratio=10}, -- Crystallized/Eternal Water
 }
+
 function TSM:GetEquivItem(itemID)
 	for _, itemPair in ipairs(equivItems) do
 		if itemID == itemPair.lower then
