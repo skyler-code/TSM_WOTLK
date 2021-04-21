@@ -180,12 +180,9 @@ end
 
 function GUI:Load(parent)
     local tabGroupTable={}
-	local select
 	local spellTable = TSM:GetSpells()
-	--find which spells are known--
     for k,v in pairs(spellTable) do
         tinsert(tabGroupTable, {text=v,value=k})
-        select = k
     end
     tinsert(tabGroupTable, {text=L["Config"], value="Config"})
 
@@ -224,8 +221,9 @@ function GUI:Load(parent)
             end
 		end)
 	
-	simpleGroup:AddChild(tabGroup)	
-	tabGroup:SelectTab(select)
+	simpleGroup:AddChild(tabGroup)
+    local _, firstTab = next(tabGroupTable)
+	tabGroup:SelectTab(firstTab.value)
 	
 	GUI:HookScript(simpleGroup.frame, "OnHide", function() 
         GUI:UnhookAll() 

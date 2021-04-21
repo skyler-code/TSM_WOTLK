@@ -75,11 +75,9 @@ function destroybtn:Show()
         elseif item == "Milling" then
             mat = "Millable"
         end
-        print(mat)
         
         dButton:SetLocationsFunc( function(previous)
-            TSM.loot:show() 
-            print(mat)
+            TSM.loot:show()
             return TSM.util:searchAndDestroy(mat,previous)
         end)
     end
