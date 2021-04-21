@@ -28,20 +28,6 @@ local Obj = {
     filter = nil
 }
 
-
-local function getSpells()
-	local t = {}
-    if IsSpellKnown(disenchant) then
-		t["Disenchant"] = L["Disenchant"]
-	end
-	if IsSpellKnown(milling) then
-		t["Milling"] = L["Milling"]
-	end
-	if IsSpellKnown(prospecting) then
-		t["Prospecting"] = L["Prospecting"]
-	end
-    return t
-end  
 local Spacer = 
 {
     type = "Label",
@@ -88,23 +74,22 @@ local function drawConfigUI (container)
                     relativeWidth = 0.5,
                     list =  spellTable,
                     value = current,
-                    callback =	function(this, event, item) rTable = item end			
+                    callback =	function(this, event, item) rTable = item end
                 }, 	-- End Prospecting DD
                 {	--button
                     type = "Button",
                     text = L["Clear Results Table"],
                     relativeWidth = .5,
                     callback = function()
-                        local prof = spellTable[rTable]
-                        if not prof then return end
-                        if prof == "Prospecting" then
+                        if not rTable then return end
+                        if rTable == "Prospecting" then
                             TSM.db.factionrealm.Prospecting = {Day = {},Mat = {}}
-                        elseif prof == "Milling" then
+                        elseif rTable == "Milling" then
                             TSM.db.factionrealm.Milling = {Day = {},Mat = {}}
-                        elseif prof == "Disenchant" then
+                        elseif rTable == "Disenchant" then
                             TSM.db.factionrealm.DE = {Day = {},Mat = {}}
                         end
-                        TSM:Print(L[prof]..L[" Table has been cleared"])
+                        TSM:Print(spellTable[rTable]..L[" Table has been cleared"])
                     end			
                 }, 	--button
             }--end childern

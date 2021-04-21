@@ -7,40 +7,35 @@ local destroybtn = TSM:NewModule("destroybtn", "AceEvent-3.0", "AceHook-3.0")--T
 local AceGUI = LibStub("AceGUI-3.0") -- load the AceGUI libraries
 
 
---Useful Globals--
-local mat
-
 local speedTable ={
     ["Slow"]   = "Slow",
     ["Normal"] = "Normal",
     ["Fast"]   = "Fast"
 }
 
-
-local frame = nil
 function destroybtn:Show()
-    if frame and frame:IsVisible() then return end
+    if self.frame and self.frame:IsVisible() then return end
     
-    local spellTable = TSM:GetSpells()
+    local spellTable, numKnown = TSM:GetSpells()
 
-    if #spellTable == 0 then 
+    if numKnown == 0 then 
         return TSM:Print(L["You do not know Milling, Prospecting or Disenchant."])
     end
 
     --TSM:Print(L["The Destroyer has risen!"])
 
-    frame = AceGUI:Create("TSMWindow")
+    self.frame = AceGUI:Create("TSMWindow")
     local dButton = AceGUI:Create("TSMFastDestroyButton")
     local dropSpell = AceGUI:Create("TSMDropdown")
     local dropSpeed = AceGUI:Create("TSMDropdown")
 
-    frame:SetCallback("OnClose", function(widget) AceGUI:Release(widget) end)
-    frame:SetTitle(L["The Destroyer"])
-    frame:SetLayout("Flow")
-    frame:SetHeight(175)
-    frame:SetWidth(200)
-    frame:SetPoint(TSM.db.global.anchor, TSM.db.global.xPos, TSM.db.global.yPos)
-    frame:SetCallback("OnClose", function (self) 
+    self.frame:SetCallback("OnClose", function(widget) AceGUI:Release(widget) end)
+    self.frame:SetTitle(L["The Destroyer"])
+    self.frame:SetLayout("Flow")
+    self.frame:SetHeight(175)
+    self.frame:SetWidth(200)
+    self.frame:SetPoint(TSM.db.global.anchor, TSM.db.global.xPos, TSM.db.global.yPos)
+    self.frame:SetCallback("OnClose", function (self) 
         TSM.db.global.anchor,_, _,TSM.db.global.xPos,TSM.db.global.yPos = self:GetPoint() 
         AceGUI:Release(self)
         dButton:SetSpell(nil)
@@ -51,8 +46,8 @@ function destroybtn:Show()
     dButton:SetMode("normal")
     dButton:SetLocationsFunc( function(previous)
         TSM.loot:show() 
-        if mat == "Disenchantable" then return end
-        return TSM.util:searchAndDestroy(mat,previous)
+        if self.mat == "Disenchantable" then return end
+        return TSM.util:searchAndDestroy(self.mat,previous)
     end)
 
     dropSpeed:SetList(speedTable)
@@ -75,25 +70,26 @@ function destroybtn:Show()
         end
         
         if item =="Prospecting" then
-            mat = "Prospectable"
+            self.mat = "Prospectable"
         elseif item == "Milling" then
-            mat = "Millable"
+            self.mat = "Millable"
         end
         
         dButton:SetLocationsFunc( function(previous)
             TSM.loot:show() 
-            return TSM.util:searchAndDestroy(mat,previous)
+            return TSM.util:searchAndDestroy(self.mat,previous)
         end)
     end
 
     dropSpell:SetList(spellTable)
-    dropSpell:SetCallback("OnValueChanged",function(this, event, item) setDestroyMode(spellTable[item]) end)
-    dropSpell:SetValue(1)
-    setDestroyMode(spellTable[1])
+    dropSpell:SetCallback("OnValueChanged",function(this, event, item) setDestroyMode(item) end)
+    local firstKey = next(spellTable)
+    dropSpell:SetValue(firstKey)
+    setDestroyMode(firstKey)
 
-    frame:AddChild(dropSpell) 
-    frame:AddChild(dropSpeed)
-    frame:AddChild(dButton)
+    self.frame:AddChild(dropSpell) 
+    self.frame:AddChild(dropSpeed)
+    self.frame:AddChild(dButton)
 end
 
     

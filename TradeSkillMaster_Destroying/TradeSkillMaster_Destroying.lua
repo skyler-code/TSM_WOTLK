@@ -9,7 +9,7 @@
 -- ------------------------------------------------------------------------------------- --
 
 -- setup
-local TSM = select(2, ...)
+local addonName, TSM = ...
 TSM = LibStub("AceAddon-3.0"):NewAddon(TSM, "TradeSkillMaster_Destroying", "AceEvent-3.0", "AceConsole-3.0")
 
 local AceGUI = LibStub("AceGUI-3.0")
@@ -80,21 +80,22 @@ function TSM:getDestroyBtn() TSM.destroybtn:Show() end
 
 --Professions--
 local PROFESSION_IDS = {
-    31252, --Prospecting
-    13262, --Disenchant
-    51005, --Milling
+    ["Disenchant"]  = 13262, --Disenchant
+    ["Prospecting"] = 31252, --Prospecting
+    ["Milling"]     = 51005, --Milling
 }
+
 function TSM:GetSpells()
-	local t = {}
+	local t, numKnown = {}, 0
     for k,v in pairs(PROFESSION_IDS) do
         if IsSpellKnown(v) then
             local name = GetSpellInfo(v)
-            tinsert(t, name)
+			t[k] = name
+			numKnown = numKnown + 1
         end
     end
-    return t
+    return t, numKnown
 end
-
 
 function TSM:IsDestroyable(bag, slot, action)
 
@@ -290,17 +291,11 @@ do
 		
 		-- set the spell that the button is going to cast
 		["SetSpell"] = function(self, spell)
-			if not spell then self.spell = nil; return end
-            spell = strlower(spell or "")
-            assert(spell == "milling" or spell == "prospecting" or spell == "disenchant", "Invalid spell name: "
-            ..spell..". Expected \"Milling\" or \"Prospecting\" or \"Disenchant\"")
-			
-			--to fix localizationg problem--F
-			if (spell == "prospecting") then spell = GetSpellInfo (prospecting) end
-			if (spell == "milling") then spell = GetSpellInfo (milling) end
-			if (spell == "disenchant") then spell = GetSpellInfo (disenchant) end
-
-			self.spell = spell
+			if not spell or spell == "" then self.spell = nil; return end
+			local spellTable = TSM:GetSpells()
+			local prof = spellTable[spell]
+            assert(prof ~= nil, "Invalid spell name: "..spell..". Expected \"Milling\" or \"Prospecting\" or \"Disenchant\"")
+			self.spell = prof
 		end,
 		
 		-- sets what mode the button will operate under (normal / fast)
