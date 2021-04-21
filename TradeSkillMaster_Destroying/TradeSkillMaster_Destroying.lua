@@ -10,13 +10,13 @@
 
 -- setup
 local addonName, TSM = ...
-TSM = LibStub("AceAddon-3.0"):NewAddon(TSM, "TradeSkillMaster_Destroying", "AceEvent-3.0", "AceConsole-3.0")
+TSM = LibStub("AceAddon-3.0"):NewAddon(TSM, addonName, "AceEvent-3.0", "AceConsole-3.0")
 
 local AceGUI = LibStub("AceGUI-3.0")
 
 -- loads the localization table --
-local L = LibStub("AceLocale-3.0"):GetLocale("TradeSkillMaster_Destroying") 
-TSM.version = GetAddOnMetadata("TradeSkillMaster_Destroying","X-Curse-Packaged-Version") or GetAddOnMetadata("TradeSkillMaster_Destroying", "Version") -- current version of the addon
+local L = LibStub("AceLocale-3.0"):GetLocale(addonName) 
+TSM.version = GetAddOnMetadata(addonName,"X-Curse-Packaged-Version") or GetAddOnMetadata(addonName, "Version") -- current version of the addon
 
 qualityColors = { --I stole this from Sapu....
 	[0]="9d9d9d",
@@ -63,9 +63,9 @@ function TSM:OnEnable()
 	for name, module in pairs(TSM.modules) do TSM[name] = module end
      
 	-- load the saved variables table into TSM.db
-	TSM.db = LibStub:GetLibrary("AceDB-3.0"):New("TradeSkillMaster_DestroyingDB", savedDBDefaults, true)
-	TSMAPI:RegisterReleasedModule("TradeSkillMaster_Destroying", TSM.version, GetAddOnMetadata("TradeSkillMaster_Destroying", "Author"),GetAddOnMetadata("TradeSkillMaster_Destroying", "Notes"))	
-	TSMAPI:RegisterIcon(L["Destroying"], "Interface\\Icons\\INV_Gizmo_RocketBoot_Destroyed_02",function(...) TSM.GUI:Load(...) end, "TradeSkillMaster_Destroying")
+	TSM.db = LibStub:GetLibrary("AceDB-3.0"):New(addonName.."DB", savedDBDefaults, true)
+	TSMAPI:RegisterReleasedModule(addonName, TSM.version, GetAddOnMetadata(addonName, "Author"),GetAddOnMetadata(addonName, "Notes"))	
+	TSMAPI:RegisterIcon(L["Destroying"], "Interface\\Icons\\INV_Gizmo_RocketBoot_Destroyed_02",function(...) TSM.GUI:Load(...) end, addonName)
     
     TSMAPI:RegisterSlashCommand("destroy", TSM.getDestroyBtn, L["Displays the destroy button"], true)
     
