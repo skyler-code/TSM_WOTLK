@@ -9,18 +9,13 @@
 -- ---------------------------------------------------------------------------------------
 --TSMAPI:RegisterSlashCommand("destroying", GUI:Load, "/TSM Destroying", notLoadFunc)
 
--- loads the localization table --
-local L = LibStub("AceLocale-3.0"):GetLocale("TradeSkillMaster_Destroying") 
-
 -- load the parent file (TSM) into a local variable and register this file as a module
-local TSM = select(2, ...)
+local addonName, TSM = ...
+-- loads the localization table --
+local L = LibStub("AceLocale-3.0"):GetLocale(addonName)
+
 local GUI = TSM:NewModule("GUI", "AceEvent-3.0", "AceHook-3.0")--TSM:NewModule("GUI", "AceEvent-3.0")
 local AceGUI = LibStub("AceGUI-3.0") -- load the AceGUI libraries
-
---Professions--
-local prospecting = 31252
-local milling = 51005
-local disenchant = 13262
 
 local Obj = {
     frame = nil,
@@ -60,13 +55,13 @@ local function drawConfigUI (container)
                     type = "Button",
 					text = L["Create Macro to Display the Destroyer"],
 					relativeWidth = 1,
-					callback = function() CreateMacro("TSMDestroyer", 1, "/tsm destroy", nil, nil) end			
+					callback = function() CreateMacro("TSMDestroyer", 1, "/tsm destroy", nil, nil) end
                 }, 	--button
                 {	--button
                     type = "Button",
 					text = L["Create Macro to Use the Destroyer"],
 					relativeWidth = 1,
-					callback = function() CreateMacro("TSMUseDestroyer", 1, "/click TSMDestroyingButton1", nil, nil) end			
+					callback = function() CreateMacro("TSMUseDestroyer", 1, "/click TSMDestroyingButton1", nil, nil) end
                 }, 	--button
                 Spacer, 
                 {	--Prospecting DD
@@ -122,7 +117,7 @@ local function drawUI (container)
                     type = "Button",
                     text = L["Display the Destroyer"],
                     relativeWidth = 1,
-                    callback = function() TSM.destroybtn:Show() end			
+                    callback = function() TSM.destroybtn:Show() end
 
                 }, 	--button
                 {	--filter DD
@@ -133,7 +128,7 @@ local function drawUI (container)
                     value = Obj.filter,
                     callback =	function(this, event, filter) 
                         Obj.filter = filter
-                        TSM.db.global.filter = filter                        
+                        TSM.db.global.filter = filter
                         TSM.stDestroying:updateTable(Obj.frame, Obj.action, Obj.filter)
                     end			
                 }, 	-- End filter DD
@@ -186,21 +181,13 @@ end
 function GUI:Load(parent)
     local tabGroupTable={}
 	local select
-	
+	local spellTable = TSM:GetSpells()
 	--find which spells are known--
-    if IsSpellKnown(disenchant) then
-		table.insert(tabGroupTable, {text=L["Disenchant"], value=3} )
-		select = 3
-	end
-	if IsSpellKnown(milling) then
-		table.insert(tabGroupTable, {text=L["Milling"], value=2} )
-		select = 2
-	end
-	if IsSpellKnown(prospecting) then
-		table.insert(tabGroupTable, {text=L["Prospecting"], value=1} )
-        select = 1
-	end
-    table.insert(tabGroupTable, {text=L["Config"], value=4} )
+    for k,v in pairs(spellTable) do
+        tinsert(tabGroupTable, {text=v,value=k})
+        select = k
+    end
+    tinsert(tabGroupTable, {text=L["Config"], value="Config"})
 
 	local simpleGroup = AceGUI:Create("TSMSimpleGroup")
 	simpleGroup:SetLayout("Fill")
@@ -213,34 +200,27 @@ function GUI:Load(parent)
 	tabGroup:SetTabs(tabGroupTable)
 	
 	tabGroup:SetCallback("OnGroupSelected", function(self, _, value)
-			
             tabGroup:ReleaseChildren()		
 			TSM.stDestroying:hideTable()
-            TSM.stDE:hideTable() 
-            
-            if value == 1  then --prospecting
-                Obj.action = "prospecting"
-                Obj.filter = "mats"
-			elseif value == 2  then --milling
-                Obj.action = "milling"
-                Obj.filter = "mats"
-			elseif value == 3 then --DE
-                Obj.action = "disenchant"
-                Obj.filter = "mats"
-            elseif value == 4 then --config
+            TSM.stDE:hideTable()
+
+            if value == "Config" then
                 drawConfigUI (self)
                 Obj.frame  = nil
                 Obj.action = nil
                 return
-			end
+            else
+                Obj.action = strlower(value)
+                Obj.filter = "mats"
+            end
             
             Obj.frame = self
-            if value < 3 then
+            if value ~= "Disenchant" then
                 drawUI (self)
-                TSM.stDestroying:DrawScrollFrame (self, Obj.action, Obj.filter)             
+                TSM.stDestroying:DrawScrollFrame (self, Obj.action, Obj.filter)
             else
                 drawDE_UI(self)
-                TSM.stDE:InitScrollFrames (self, Obj.action, Obj.filter)             
+                TSM.stDE:InitScrollFrames (self, Obj.action, Obj.filter)
             end
 		end)
 	

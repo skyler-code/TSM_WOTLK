@@ -1,11 +1,12 @@
--- loads the localization table --
-local L = LibStub("AceLocale-3.0"):GetLocale("TradeSkillMaster_Destroying") 
-
 -- load the parent file (TSM) into a local variable and register this file as a module
-local TSM = select(2, ...)
+local addonName, TSM = ...
+-- loads the localization table --
+local L = LibStub("AceLocale-3.0"):GetLocale(addonName) 
+
 local destroybtn = TSM:NewModule("destroybtn", "AceEvent-3.0", "AceHook-3.0")--TSM:NewModule("GUI", "AceEvent-3.0")
 local AceGUI = LibStub("AceGUI-3.0") -- load the AceGUI libraries
 
+local mat
 
 local speedTable ={
     ["Slow"]   = "Slow",
@@ -22,7 +23,7 @@ function destroybtn:Show()
         return TSM:Print(L["You do not know Milling, Prospecting or Disenchant."])
     end
 
-    --TSM:Print(L["The Destroyer has risen!"])
+    TSM:Print(L["The Destroyer has risen!"])
 
     self.frame = AceGUI:Create("TSMWindow")
     local dButton = AceGUI:Create("TSMFastDestroyButton")
@@ -46,8 +47,8 @@ function destroybtn:Show()
     dButton:SetMode("normal")
     dButton:SetLocationsFunc( function(previous)
         TSM.loot:show() 
-        if self.mat == "Disenchantable" then return end
-        return TSM.util:searchAndDestroy(self.mat,previous)
+        if mat == "Disenchantable" then return end
+        return TSM.util:searchAndDestroy(mat,previous)
     end)
 
     dropSpeed:SetList(speedTable)
@@ -70,14 +71,16 @@ function destroybtn:Show()
         end
         
         if item =="Prospecting" then
-            self.mat = "Prospectable"
+            mat = "Prospectable"
         elseif item == "Milling" then
-            self.mat = "Millable"
+            mat = "Millable"
         end
+        print(mat)
         
         dButton:SetLocationsFunc( function(previous)
             TSM.loot:show() 
-            return TSM.util:searchAndDestroy(self.mat,previous)
+            print(mat)
+            return TSM.util:searchAndDestroy(mat,previous)
         end)
     end
 

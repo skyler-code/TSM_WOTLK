@@ -116,8 +116,8 @@ function TSM:IsDestroyable(bag, slot, action)
 			if text and text:GetText() == ITEM_PROSPECTABLE then		
 				return true
 			end
-		elseif action == "Millable" then	
-			if text and text:GetText() == ITEM_MILLABLE then			
+		elseif action == "Millable" then
+			if text and text:GetText() == ITEM_MILLABLE then
 				return true
 			end
 		end --end elseif
@@ -129,11 +129,6 @@ end
    
 -- FastDestroyButton
 do
-
-	local prospecting = 31252
-	local milling = 51005
-	local disenchant = 13262
-
 	local Type, Version = "TSMFastDestroyButton", 2
 	if not AceGUI or (AceGUI:GetWidgetVersion(Type) or 0) >= Version then return end
 	
