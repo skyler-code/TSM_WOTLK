@@ -374,6 +374,6 @@ end
 function Cancel:ToggleScanning(value)
 	isScanning = value
 	if value then
-		_G["isCancelScan"] = true
+		TSMAPI.auctionMode = 'cancel'
 	end
 end

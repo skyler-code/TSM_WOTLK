@@ -484,6 +484,6 @@ end
 function Post:ToggleScanning(value)
 	isScanning = value
 	if value then
-		_G["isPostScan"] = true
+		TSMAPI.auctionMode = 'post'
 	end
 end

@@ -1219,16 +1219,15 @@ function private:Stopped(notDone)
 	private.buttons:Disable(true)
 	private.statusBar:UpdateStatus(100, 100)
 	private.contentButtons.currAuctionsButton:Hide()
+	TSMAPI.auctionMode = nil
 	
 	if private.mode == "Post" then
 		TSMAPI:CreateTimeDelay("aucTotalGold", 0.5, SetGoldText)
 		SetGoldText()
 		private.statusBar:SetStatusText(L["Post Scan Finished"])
-		_G["isPostScan"] = nil
 	elseif private.mode == "Cancel" then
 		private.infoText:SetInfo(L["Done Canceling"])
 		private.statusBar:SetStatusText(L["Cancel Scan Finished"])
-		_G["isCancelScan"] = nil
 	elseif private.mode == "Reset" then
 		if not notDone then
 			private.infoText:SetInfo(L["No Items to Reset"])

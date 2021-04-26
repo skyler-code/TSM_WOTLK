@@ -95,6 +95,7 @@ function private:AUCTION_HOUSE_SHOW()
 			end
 		end
 	end
+	TSMAPI.auctionMode = nil
 end
 
 function private:OnTabClick()
@@ -370,8 +371,7 @@ function private:CreateSidebarButtons(parent)
 			label:SetText(mode.buttonText)
 			btn:SetFontString(label)
 			btn:SetScript("OnClick", function(self, button)
-					_G["isPostScan"] = nil
-					_G["isCancelScan"] = nil
+					TSMAPI.auctionMode = nil
 					UnlockAllHighlight()
 					self:LockHighlight()
 					private:OnSidebarButtonClick(mode, "LeftButton")
