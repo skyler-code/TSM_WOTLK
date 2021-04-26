@@ -86,7 +86,6 @@ function destroybtn:Show()
     dropSpell:SetCallback("OnValueChanged",function(this, event, item) setDestroyMode(item) end)
     local firstKey = next(spellTable)
     dropSpell:SetValue(firstKey)
-    setDestroyMode(firstKey)
 
     self.frame:AddChild(dropSpell) 
     self.frame:AddChild(dropSpeed)
