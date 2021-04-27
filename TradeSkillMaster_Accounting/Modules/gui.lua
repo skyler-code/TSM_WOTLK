@@ -18,6 +18,15 @@ local L = LibStub("AceLocale-3.0"):GetLocale("TradeSkillMaster_Accounting") -- l
 local ROW_HEIGHT = 16
 local saleST, buyST, itemSummaryST, resaleSummaryST, itemDetailST
 
+local tabs = {
+	{text=L["Summary"], value="Summary"},
+	{text=L["Sales"], value="Sales"},
+	{text=L["Purchases"], value="Purchases"},
+	{text=L["Items"], value="Items"},
+	{text=L["Resale"], value="Resale"},
+	{text=L["Options"], value="Options"},
+}
+
 function GUI:Load(parent)
 	local simpleGroup = AceGUI:Create("SimpleGroup")
 	simpleGroup:SetLayout("Fill")
@@ -25,27 +34,27 @@ function GUI:Load(parent)
 
 	local tabGroup =  AceGUI:Create("TSMTabGroup")
 	tabGroup:SetLayout("Fill")
-	tabGroup:SetTabs({{text=L["Sales"], value=1}, {text=L["Purchases"], value=2}, {text=L["Items"], value=3}, {text=L["Resale"], value=4}, {text=L["Summary"], value=5}, {text=L["Options"], value=6}})
+	tabGroup:SetTabs(tabs)
 	tabGroup:SetCallback("OnGroupSelected", function(self, _, value)
 			tabGroup:ReleaseChildren()
 			GUI:HideScrollingTables()
-			if value == 1 then
+			if value == "Sales" then
 				GUI:DrawSales(self)
-			elseif value == 2 then
+			elseif value == "Purchases" then
 				GUI:DrawPurchases(self)
-			elseif value == 3 then
+			elseif value == "Items" then
 				GUI:DrawItemSummary(self)
-			elseif value == 4 then
+			elseif value == "Resale" then
 				GUI:DrawResaleSummary(self)
-			elseif value == 5 then
+			elseif value == "Summary" then
 				GUI:DrawGoldSummary(self)
-			elseif value == 6 then
+			elseif value == "Options" then
 				GUI:DrawOptions(self)
 			end
 		end)
 	simpleGroup:AddChild(tabGroup)
 	TSM.Data:PopulateDataCaches()
-	tabGroup:SelectTab(1)
+	tabGroup:SelectTab("Summary")
 	
 	GUI:HookScript(simpleGroup.frame, "OnHide", function()
 			GUI:UnhookAll()
