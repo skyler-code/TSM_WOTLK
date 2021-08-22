@@ -13,77 +13,42 @@ local L = LibStub("AceLocale-3.0"):GetLocale(addonName) -- loads the localizatio
 
 function AuctionSales:OnEnable()
 	ChatFrame_AddMessageEventFilter("CHAT_MSG_SYSTEM", AuctionSales.FilterSystemMsg)
-	AuctionSales:RegisterEvent("AUCTION_OWNED_LIST_UPDATE")
+	self:RegisterEvent("AUCTION_OWNED_LIST_UPDATE")
 end
 
 function AuctionSales:OnDisable()
 	ChatFrame_RemoveMessageEventFilter("CHAT_MSG_SYSTEM", AuctionSales.FilterSystemMsg)
-	AuctionSales:UnregisterEvent("AUCTION_OWNED_LIST_UPDATE")
+	self:UnregisterEvent("AUCTION_OWNED_LIST_UPDATE")
 end
 
 function AuctionSales:AUCTION_OWNED_LIST_UPDATE()
-	wipe(TSM.db.char.auctionPrices)
-	wipe(TSM.db.char.auctionMessages)
-	
-	local auctionPrices = {}
-	for i=1, GetNumAuctionItems("owner") do
-		local link = GetAuctionItemLink("owner", i)
+	for i = 1, GetNumAuctionItems("owner") do
 		local name, _, quantity, _, _, _, _, _, buyout, _, _, _, wasSold = GetAuctionItemInfo("owner", i)
-		if wasSold == 0 then
-			if buyout and buyout > 0 then
-				auctionPrices[link] = auctionPrices[link] or {name=name}
-				tinsert(auctionPrices[link], {buyout=buyout, quantity=quantity})
-			end
-		end
-	end
-	for link, auctions in pairs(auctionPrices) do
-		-- make sure all auctions are the quantity
-		local quantity = auctions[1].quantity
-		for i=2, #auctions do
-			if quantity ~= auctions[i].quantity then
-				quantity = nil
-				break
-			end
-		end
-		if quantity then
-			local prices = {}
-			for _, data in ipairs(auctions) do
-				tinsert(prices, data.buyout)
-			end
-			sort(prices)
-			TSM.db.char.auctionPrices[link] = prices
-			TSM.db.char.auctionMessages[format(ERR_AUCTION_SOLD_S, auctions.name)] = link
+		if wasSold == 0 and (buyout and buyout > 0) then
+			TSM.db.char.auctions[name] = {buyout=buyout, quantity=quantity}
 		end
 	end
 end
 
-local EXPIRED = ERR_AUCTION_EXPIRED_S:gsub("%%s", "(.-)")
+local SOLD = ERR_AUCTION_SOLD_S:gsub("%%s", "(.+)")
+local EXPIRED = ERR_AUCTION_EXPIRED_S:gsub("%%s", "(.+)")
 
-function AuctionSales.FilterSystemMsg(self, event, msg, ...)
-	local lineID = select(10, ...)
-	if lineID ~= self.prevLineID then
-		self.prevLineID = lineID
+function AuctionSales.FilterSystemMsg(chatFrame, event, msg, ...)
+	local expiredItem = strmatch(msg, EXPIRED)
+	local soldItem = strmatch(msg, SOLD)
+	local itemName = expiredItem or soldItem
 
-		local expiredItem = strmatch(msg, EXPIRED)
-		if expiredItem then
-			local _, itemLink = GetItemInfo(expiredItem)
-			if itemLink then
-				return nil, format(ERR_AUCTION_EXPIRED_S, itemLink), ...
-			end
-			return
-		end
+	local auctionItemInfo = TSM.db.char.auctions[itemName]
+	if not auctionItemInfo then return end
 
-		local link = TSM.db.char.auctionMessages and TSM.db.char.auctionMessages[msg]
-		if not link then return end
+	local _, itemLink = GetItemInfo(itemName)
+	if not itemLink then return end
 
-		local price = tremove(TSM.db.char.auctionPrices[link], 1)
-		if not price then -- couldn't determine the price, so just replace the link
-			return nil, format(ERR_AUCTION_SOLD_S, link), ...
-		end
+	if expiredItem then
+		return nil, format(ERR_AUCTION_EXPIRED_S, itemLink), ...
+	end
 
-		if #TSM.db.char.auctionPrices[link] == 1 then -- this was the last auction
-			TSM.db.char.auctionMessages[msg] = nil
-		end
-		return nil, format(L["Your auction of %s has sold for |cFFFFFFFF%s|r"], link, GetCoinTextureString(price)), ...
+	if soldItem then
+		return nil, format(L["Your auction of %sx%s has sold for |cFFFFFFFF%s|r"], itemLink, auctionItemInfo.quantity, GetCoinTextureString(auctionItemInfo.buyout)), ...
 	end
 end
