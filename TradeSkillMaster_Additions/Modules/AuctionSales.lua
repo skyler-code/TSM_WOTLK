@@ -38,14 +38,14 @@ function AuctionSales.FilterSystemMsg(chatFrame, event, msg, ...)
 	local expiredItem = strmatch(msg, EXPIRED)
 	local soldItem = strmatch(msg, SOLD)
 
-	local auctionItemInfo = TSM.db.char.auctions[expiredItem or soldItem]
-	if not auctionItemInfo then return end
+	local itemInfo = TSM.db.char.auctions[expiredItem or soldItem]
+	if not itemInfo then return end
 
 	if expiredItem then
-		return nil, format(ERR_AUCTION_EXPIRED_S, auctionItemInfo.itemLink), ...
+		return nil, format(ERR_AUCTION_EXPIRED_S, itemInfo.itemLink), ...
 	end
 
 	if soldItem then
-		return nil, format(L["Your auction of %sx%s has sold for |cFFFFFFFF%s|r"], auctionItemInfo.itemLink, auctionItemInfo.quantity, GetCoinTextureString(auctionItemInfo.buyout)), ...
+		return nil, format(L["Your auction of %sx%s has sold for |cFFFFFFFF%s|r"], itemInfo.itemLink, itemInfo.quantity, GetCoinTextureString(itemInfo.buyout)), ...
 	end
 end
