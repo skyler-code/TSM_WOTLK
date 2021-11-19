@@ -105,6 +105,7 @@ function Data:EventHandler(event, fire)
 	else
 		if event == "BAG_UPDATE" then
 			Data:GetBagData()
+			self:GetBankData()
 		elseif event == "PLAYERBANKSLOTS_CHANGED" or event == "BANKFRAME_OPENED" then
 			Data:GetBankData()
 		elseif event == "AUCTION_OWNED_LIST_UPDATE" then
@@ -130,6 +131,7 @@ end
 
 -- scan the player's bank
 function Data:GetBankData()
+	if not (BagnonFramebank or BankFrame):IsShown() then return end
 	local locationList = {}
 	wipe(TSM.characters[CURRENT_PLAYER].bank)
 	
