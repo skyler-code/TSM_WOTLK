@@ -15,36 +15,36 @@ do
 				for item, data in pairs(destroyingData[modes[i]][j]) do
 					if item ~= "desc" then
 						if not data.name then
-							TSMAPI:SetGameTooltip(item)
+							TSMAPI:SetCacheTooltip(item)
 							cacheComplete = false
 							data.name = GetItemInfo(item)
 						end
 						if modes[i] == "mill" then
 							if not GetItemInfo(data.pigment) then
-								TSMAPI:SetGameTooltip(data.pigment)
+								TSMAPI:SetCacheTooltip(data.pigment)
 								cacheComplete = false
 							end
 							for k=1, #data.herbs do
 								if not GetItemInfo(data.herbs[k].itemID) then
-									TSMAPI:SetGameTooltip(data.herbs[k].itemID)
+									TSMAPI:SetCacheTooltip(data.herbs[k].itemID)
 									cacheComplete = false
 								end
 							end
 						elseif modes[i] == "transform" then
 							if not GetItemInfo(data.otherItemID) then
-								TSMAPI:SetGameTooltip(data.otherItemID)
+								TSMAPI:SetCacheTooltip(data.otherItemID)
 								cacheComplete = false
 							end
 						elseif modes[i] == "prospect" then
 							for k=1, #data.gems do
 								if not GetItemInfo(data.gems[k]) then
-									TSMAPI:SetGameTooltip(data.gems[k])
+									TSMAPI:SetCacheTooltip(data.gems[k])
 									cacheComplete = false
 								end
 							end
 							for k=1, #data.ore do
 								if not GetItemInfo(data.ore[k].itemID) then
-									TSMAPI:SetGameTooltip(data.ore[k].itemID)
+									TSMAPI:SetCacheTooltip(data.ore[k].itemID)
 									cacheComplete = false
 								end
 							end

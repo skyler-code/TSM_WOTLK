@@ -288,7 +288,7 @@ local function UpdateCache()
 		if GetItemInfo(item) then
 			tremove(itemsToCache, i)
 		else
-			lib:SetGameTooltip(item)
+			lib:SetCacheTooltip(item)
 		end
 	end
 	
@@ -315,6 +315,14 @@ function lib:GetItemInfoCache(items, isKey)
 	end
 end
 
-function lib:SetGameTooltip(itemId)
-	GameTooltip:SetHyperlink("item:"..itemId..":0:0:0:0:0:0:0")
+local scanTooltip
+function lib:SetCacheTooltip(itemId)
+	if not scanTooltip then
+		scanTooltip = CreateFrame("GameTooltip", "TSMCachingTooltip", UIParent, "GameTooltipTemplate")
+		scanTooltip:SetOwner(UIParent, "ANCHOR_NONE")
+	end
+	scanTooltip:ClearLines()
+	if itemId then
+		scanTooltip:SetHyperlink("item:"..itemId..":0:0:0:0:0:0:0")
+	end
 end
