@@ -13,17 +13,6 @@ local deGUIObj = {
     action     = nil, 
     filter     = nil
 }
-local qualityColors = { --I stole this from Sapu....
-	[0]="9d9d9d",
-	[1]="ffffff",
-	[2]="1eff00",
-	[3]="0070dd",
-	[4]="a335ee",
-	[5]="ff8000",
-	[6]="e6cc80",
-}
-
-
 
 local function noLoot()
     return{ { cols = { { 
@@ -52,7 +41,7 @@ local function createRow(name,d)
 		cols = {
 			{},
 			{
-                value = function(data, qual) if data and qual then return "|cff"..qualityColors[qual]..data.."|r" end end,
+                value = function(data, qual) if data and qual then return ITEM_QUALITY_COLORS[qual].hex..data.."|r" end end,
                 args = {name, d.quality},
             },
 			{

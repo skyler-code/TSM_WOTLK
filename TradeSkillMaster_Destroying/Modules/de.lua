@@ -6,44 +6,34 @@ local TSM = select(2, ...)
 local de = TSM:NewModule("de", "AceEvent-3.0", "AceHook-3.0")--TSM:NewModule("GUI", "AceEvent-3.0")
 local AceGUI = LibStub("AceGUI-3.0") -- load the AceGUI libraries
 
+local GetItemQualityColor, GetContainerNumSlots, GetItemInfo, IsEquippableItem, GetContainerItemID, GetContainerItemLink =
+    GetItemQualityColor, GetContainerNumSlots, GetItemInfo, IsEquippableItem, GetContainerItemID, GetContainerItemLink
+local tinsert, strmatch, pairs, select = table.insert, strmatch, pairs, select
+
 de.dObj = {
     bag = 0,
     slot = 1,
     Item = nil,
 }
 
-local qualityColors = {
-	[0]="9d9d9d",
-	[1]="ffffff",
-	[2]="1eff00",
-	[3]="0070dd",
-	[4]="a335ee",
-	[5]="ff8000",
-	[6]="e6cc80",
-}
-
-local function canDE(id)
-    _,_,q = GetItemInfo(id)
-   
-    if id and IsEquippableItem(id) and ( q>= 2 and q <= 4 ) and not TSM.db.global.safeList[id] then
+local function canDE(itemString)
+    if not itemString then return end
+    local _,_,q = GetItemInfo(itemString)
+    if IsEquippableItem(itemString) and ( q>= 2 and q <= 4 ) and not TSM.db.factionrealm.SafeTable[itemString] then
         return true
     end
-    return false
 end
 
 local bagsNum = 4
 function de:searchAndDestroy(pre) 
     for bag = de.dObj.bag, bagsNum do --bags		
         for slot = de.dObj.slot, GetContainerNumSlots(bag) do
-            local id = GetContainerItemID(bag, slot)
+            local itemString = strmatch(GetContainerItemLink(bag, slot) or "", "item[%-?%d:]+")
             if  pre == nil or (bag ~= pre.bag or slot ~= pre.slot) then 
-                if id and canDE(id) then 
-                    local itemString = string.match(GetContainerItemLink(bag, slot), "item[%-?%d:]+")
-                    if not TSM.db.factionrealm.SafeTable [itemString] then
-                        de.dObj.bag  = bag
-                        de.dObj.slot = slot
-                        return {bag = bag, slot = slot}
-                    end
+                if canDE(itemString) then 
+                    de.dObj.bag  = bag
+                    de.dObj.slot = slot
+                    return {bag = bag, slot = slot}
                 end
             end
         end--end slots
@@ -51,56 +41,61 @@ function de:searchAndDestroy(pre)
     
     de.dObj.bag  = 0
     de.dObj.slot = 1
-end 
+end
+
+local function getFormattedItemStr(id)
+    local name,_,quality = GetItemInfo(id)
+    local color = ITEM_QUALITY_COLORS[quality]
+    return color.hex..name.."|r"
+end
 
 function de:getDestroyTable ()
-     local gearTable = {}
-     for bag = 0, bagsNum do --bags		
+    local gearTable = {}
+    local itemIds = {}
+    for bag = 0, bagsNum do --bags		
         for slot = 1, GetContainerNumSlots(bag) do
-             local id = GetContainerItemID(bag, slot)
-             if id and canDE(id) then
-                local itemString = string.match(GetContainerItemLink(bag, slot), "item[%-?%d:]+")
-                local name,_,quality = GetItemInfo(id)
-                if not TSM.db.factionrealm.SafeTable [itemString] then 
-                    table.insert(gearTable, 
-                        {
-                            cols = {
-                                {
-                                    value = function(itemString, quality ) if itemString then return "|cff"..qualityColors[quality]..GetItemInfo(itemString).."|r" end end,
-                                    args = {itemString, quality},
-                                },
+            local itemString = strmatch(GetContainerItemLink(bag, slot) or "", "item[%-?%d:]+")
+            if not itemIds[itemString] and canDE(itemString) then
+                tinsert(gearTable, 
+                    {
+                        cols = {
+                            {
+                                value = function(itemString)
+                                    if itemString then
+                                        return getFormattedItemStr(itemString)
+                                    end
+                                end,
+                                args = {itemString},
                             },
-                            itemString = itemString
-                        }
-                    )
-                end
-             end
+                        },
+                        itemString = itemString
+                    }
+                )
+                itemIds[itemString] = true
+            end
         end
-     end
+    end
     return gearTable
 end
 
 function de:getSafeTable()
     local safeTable = {}
     for itemString,_ in pairs(TSM.db.factionrealm.SafeTable) do
-        if itemString then
-             table.insert(safeTable, 
+        tinsert(safeTable, 
+            {
+                cols = {
                     {
-                        cols = {
-                                {
-                                    value = function(itemString, quality ) 
-                                        if itemString then 
-                                            local _,_,quality = GetItemInfo(itemString)
-                                            return "|cff"..qualityColors[quality]..GetItemInfo(itemString).."|r" 
-                                        end 
-                                    end,
-                                    args = {itemString, quality},
-                                },
-                            },
-                            itemString = itemString
-                    }
-                )
-        end
+                        value = function(itemString, quality) 
+                            if itemString then
+                                return getFormattedItemStr(itemString) 
+                            end 
+                        end,
+                        args = {itemString},
+                    },
+                },
+                itemString = itemString
+            }
+        )
     end
     return safeTable
 end

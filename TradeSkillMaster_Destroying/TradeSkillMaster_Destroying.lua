@@ -18,16 +18,6 @@ local AceGUI = LibStub("AceGUI-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale(addonName) 
 TSM.version = GetAddOnMetadata(addonName,"X-Curse-Packaged-Version") or GetAddOnMetadata(addonName, "Version") -- current version of the addon
 
-qualityColors = { --I stole this from Sapu....
-	[0]="9d9d9d",
-	[1]="ffffff",
-	[2]="1eff00",
-	[3]="0070dd",
-	[4]="a335ee",
-	[5]="ff8000",
-	[6]="e6cc80",
-}
-
 -- default values for the savedDB
 -- list of different types of saved variables at the top of http://www.wowace.com/addons/ace3/pages/api/ace-db-3-0/
 
@@ -38,7 +28,6 @@ local savedDBDefaults = {
         yPos     = -800,
         anchor   = "TOPLEFT",
         dMode    = "Normal",
-        safeList = {},
         filter = "mats"
 	},
 	
