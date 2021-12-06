@@ -58,23 +58,9 @@ local function DecodeItemString(itemCode)
 end
 
 local function EncodeItemLink(link) --"|cff1eff00|Hitem:36926:0:0:0:0:0:0:1173889664:80:0|h[Shadow Crystal]|h|r"
-	link = link:trim()
-	link = gsub(link, "|cff", "") -- "1eff00|Hitem:36926:0:0:0:0:0:0:1173889664:80:0|h[Shadow Crystal]|h|r"
-	link = gsub(link, "|H", "|") -- "1eff00|item:36926:0:0:0:0:0:0:1173889664:80:0|h[Shadow Crystal]|h|r"
-	link = gsub(link, "|h|r", "") -- "1eff00|item:36926:0:0:0:0:0:0:1173889664:80:0|h[Shadow Crystal]"
-	link = gsub(link, "|h", "|") -- "1eff00|item:36926:0:0:0:0:0:0:1173889664:80:0|[Shadow Crystal]"
-	link = gsub(link, "%[", "") -- "1eff00|item:36926:0:0:0:0:0:0:1173889664:80:0|Shadow Crystal]"
-	link = gsub(link, "%]", "") -- "1eff00|item:36926:0:0:0:0:0:0:1173889664:80:0|Shadow Crystal"
-	
-	local colorHex, itemString, itemName = ("|"):split(link) -- "1eff00", "item:36926:0:0:0:0:0:0:1173889664:80:0", "Shadow Crystal"
-	if not (colorHex and itemString and itemName) then return end
-	for i, c in pairs(ITEM_QUALITY_COLORS) do
-		local cHex = gsub(c.hex, "|cff", "")
-		if cHex == colorHex then
-			quality = i
-			break
-		end
-	end
+	local itemString = strmatch(link, "item[%-?%d:]+")
+	local itemName, _, quality = GetItemInfo(link)
+
 	return quality.."|"..EncodeItemString(itemString).."|"..itemName
 end
 
