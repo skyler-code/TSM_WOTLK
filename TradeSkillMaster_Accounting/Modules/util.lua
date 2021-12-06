@@ -59,16 +59,16 @@ end
 
 local function EncodeItemLink(link) --"|cff1eff00|Hitem:36926:0:0:0:0:0:0:1173889664:80:0|h[Shadow Crystal]|h|r"
 	local itemString = strmatch(link, "item[%-?%d:]+")
-	local itemName, _, quality = GetItemInfo(link)
-
-	return quality.."|"..EncodeItemString(itemString).."|"..itemName
+	return EncodeItemString(itemString)
 end
 
 local function DecodeItemLink(link)
-	local colorCode, itemCode, name = ("|"):split(link)
-	local color = ITEM_QUALITY_COLORS[(tonumber(colorCode) or 0)]
-	if not (colorCode and itemCode and name) then return end
-	return color.hex.."|H"..DecodeItemString(itemCode).."|h["..name.."]|h|r", DecodeItemString(itemCode)
+	local decodedString = DecodeItemString(link)
+	local name, _, quality = GetItemInfo(decodedString)
+	local color = ITEM_QUALITY_COLORS[quality]
+	local link = ("%s|H%s|h[%s]|h|r"):format(color.hex, decodedString, name)
+
+	return link, decodedString
 end
 
 local function EncodeRecord(record, dType)
