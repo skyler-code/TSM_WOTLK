@@ -26,6 +26,12 @@ function TSMDoSync()
 	Comm:DoSync()
 end
 
+local SERVERS_WITH_NO_ENCODING = {
+	["Sindragosa"] = true
+}
+
+local USE_ENCODING = SERVERS_WITH_NO_ENCODING[GetRealmName()] ~= true
+
 function Comm:DoSync()
 	local friends = {}
 	
@@ -35,6 +41,7 @@ function Comm:DoSync()
 			friends[strlower(GetFriendInfo(i))] = i
 		end
 	end
+
 	for name in pairs(TSM.db.factionrealm.charactersToSync) do
 		if not friends[name] then
 			if GetNumFriends() == 50 then
@@ -44,7 +51,7 @@ function Comm:DoSync()
 			end
 		end
 	end
-	
+
 	-- do syncing
 	friends = {}
 	for i=1, GetNumFriends() do
@@ -66,22 +73,29 @@ function Comm:SendInventoryData(target, shouldReturnData)
 		playerData.mailInfo = {}
 	end
 	local msg = Comm:Serialize(data)
-	local compressedMsg = LibCompress:Compress(msg)
-	local encodedMsg = compressTable:Encode(compressedMsg)
+	local encodedMsg = msg
+	if USE_ENCODING then
+		local compressedMsg = LibCompress:Compress(msg)
+		encodedMsg = compressTable:Encode(compressedMsg)
+	end
 	
 	local function UpdateProgress(_, done, total)
 		if done == total then
 			TSM:Printf(L["Sending data to %s complete!"], target)
 		end
 	end
-	
+
 	TSM:Printf(L["Compressing and sending ItemTracker data to %s. This will take approximately %s seconds. Please wait..."], target, ceil(#encodedMsg/900))
 	Comm:SendCommMessage("TSMITEM_DATA", encodedMsg, "WHISPER", target, nil, UpdateProgress)
 end
 
 function Comm:OnCommReceived(_, msg, _, sender)
 	sender = strlower(sender)
-	local serializedMsg = LibCompress:Decompress(compressTable:Decode(msg))
+
+	local serializedMsg = msg
+	if USE_ENCODING then
+		serializedMsg = LibCompress:Decompress(compressTable:Decode(msg))
+	end
 	local isValid, data = Comm:Deserialize(serializedMsg)
 	
 	if Comm.invalidSenders[sender] then
