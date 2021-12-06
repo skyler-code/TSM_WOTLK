@@ -70,7 +70,6 @@ local function EncodeItemLink(link) --"|cff1eff00|Hitem:36926:0:0:0:0:0:0:117388
 	if not (colorHex and itemString and itemName) then return end
 	for i, c in pairs(ITEM_QUALITY_COLORS) do
 		local cHex = gsub(c.hex, "|cff", "")
-		print(i, cHex)
 		if cHex == colorHex then
 			quality = i
 			break
