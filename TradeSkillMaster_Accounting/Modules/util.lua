@@ -1,6 +1,19 @@
 local TSM = select(2, ...)
 local Util = TSM:NewModule("Util")
 
+local qualityColors = {
+	[0]="9d9d9d",
+	[1]="ffffff",
+	[2]="1eff00",
+	[3]="0070dd",
+	[4]="a335ee",
+	[5]="ff8000",
+	[6]="e6cc80",
+}
+
+
+
+
 local alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_="
 local base = #alpha
 local function decode(h)
@@ -58,17 +71,31 @@ local function DecodeItemString(itemCode)
 end
 
 local function EncodeItemLink(link) --"|cff1eff00|Hitem:36926:0:0:0:0:0:0:1173889664:80:0|h[Shadow Crystal]|h|r"
-	local itemString = strmatch(link, "item[%-?%d:]+")
-	local itemName, _, quality = GetItemInfo(link)
-
+	link = link:trim()
+	link = gsub(link, "|cff", "") -- "1eff00|Hitem:36926:0:0:0:0:0:0:1173889664:80:0|h[Shadow Crystal]|h|r"
+	link = gsub(link, "|H", "|") -- "1eff00|item:36926:0:0:0:0:0:0:1173889664:80:0|h[Shadow Crystal]|h|r"
+	link = gsub(link, "|h|r", "") -- "1eff00|item:36926:0:0:0:0:0:0:1173889664:80:0|h[Shadow Crystal]"
+	link = gsub(link, "|h", "|") -- "1eff00|item:36926:0:0:0:0:0:0:1173889664:80:0|[Shadow Crystal]"
+	link = gsub(link, "%[", "") -- "1eff00|item:36926:0:0:0:0:0:0:1173889664:80:0|Shadow Crystal]"
+	link = gsub(link, "%]", "") -- "1eff00|item:36926:0:0:0:0:0:0:1173889664:80:0|Shadow Crystal"
+	
+	local colorHex, itemString, itemName = ("|"):split(link) -- "1eff00", "item:36926:0:0:0:0:0:0:1173889664:80:0", "Shadow Crystal"
+	if not (colorHex and itemString and itemName) then return end
+	local quality = ""
+	for i, c in pairs(qualityColors) do
+		if c == colorHex then
+			quality = i
+			break
+		end
+	end
 	return quality.."|"..EncodeItemString(itemString).."|"..itemName
 end
 
 local function DecodeItemLink(link)
 	local colorCode, itemCode, name = ("|"):split(link)
-	local color = ITEM_QUALITY_COLORS[(tonumber(colorCode) or 0)]
+	local color = qualityColors[tonumber(colorCode) or 0] or qualityColors[0]
 	if not (colorCode and itemCode and name) then return end
-	return color.hex.."|H"..DecodeItemString(itemCode).."|h["..name.."]|h|r", DecodeItemString(itemCode)
+	return "|cff"..color.."|H"..DecodeItemString(itemCode).."|h["..name.."]|h|r", DecodeItemString(itemCode)
 end
 
 local function EncodeRecord(record, dType)
