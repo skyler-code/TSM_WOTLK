@@ -30,7 +30,7 @@ local SERVERS_WITH_NO_ENCODING = {
 	["Sindragosa"] = true
 }
 
-local USE_ENCODING = SERVERS_WITH_NO_ENCODING[GetRealmName()] ~= true
+local USE_ENCODING = not SERVERS_WITH_NO_ENCODING[GetRealmName()]
 
 function Comm:DoSync()
 	local friends = {}

@@ -15,6 +15,7 @@ local L = LibStub("AceLocale-3.0"):GetLocale("TradeSkillMaster_Auctioning") -- l
 local postQueue, currentItem = {}, {}
 local totalToPost, totalPosted, count = 0, 0
 local isScanning, GUI
+local lib = TSMAPI
 
 function Post:GetScanListAndSetup(GUIRef, options)
 	-- setup stuff
@@ -27,7 +28,7 @@ function Post:GetScanListAndSetup(GUIRef, options)
 	local tempList, scanList, groupTemp, validItems = {}, {}, {}, {}
 	
 	for bag, slot, itemString in TSM:GetBagIterator() do
-		local itemID = TSMAPI:GetItemID(itemString)
+		local itemID = lib:GetItemID(itemString)
 		if TSM.itemReverseLookup[itemID] then
 			itemString = itemID
 		end
@@ -95,7 +96,7 @@ function Post:GetScanListAndSetup(GUIRef, options)
 		end
 	end
 	
-	return scanList
+	return lib:ShuffleTable(scanList)
 end
 
 function Post:ProcessItem(itemString)
@@ -248,11 +249,11 @@ function Post:GetPostPrice(item)
 end
 
 function Post:QueueItemToPost(itemString, numStacks, stackSize, bid, buyout, postTime)	
-	local itemID = TSMAPI:GetItemID(itemString)
+	local itemID = lib:GetItemID(itemString)
 	local itemLocations = {}
-	if TSMAPI:GetNewGem(itemID) then -- if it's a gem with multiple itemIDs, we need to do something special
-		for _, oldGemID in ipairs(TSMAPI:GetOldGems(itemID)) do
-			local locations = Post:FindItemSlot(TSMAPI:GetItemString(oldGemID), true)
+	if lib:GetNewGem(itemID) then -- if it's a gem with multiple itemIDs, we need to do something special
+		for _, oldGemID in ipairs(lib:GetOldGems(itemID)) do
+			local locations = Post:FindItemSlot(lib:GetItemString(oldGemID), true)
 			for i=1, #locations do
 				tinsert(itemLocations, locations[i])
 			end
@@ -283,7 +284,7 @@ function Post:FindItemSlot(findItemString, allLocations, ignoreBagSlot)
 	local locations = {}
 	for bag, slot, itemString in TSM:GetBagIterator() do
 		local quantity = select(2, GetContainerItemInfo(bag, slot))
-		if findItemString == TSMAPI:GetItemID(itemString) or findItemString == itemString then
+		if findItemString == lib:GetItemID(itemString) or findItemString == itemString then
 			if not TSM.Util:IsSoulbound(bag, slot) and not (ignoreBagSlot and ignoreBagSlot[bag.."$"..slot]) then
 				tinsert(locations, {bag=bag, slot=slot, quantity=quantity})
 				if not allLocations then
@@ -299,7 +300,7 @@ function Post:GetNumInBags(itemString)
 	local function GetItemBagCount(findItemString)
 		local num = 0
 		for bag, slot, itemString in TSM:GetBagIterator() do
-			if findItemString == TSMAPI:GetItemID(itemString) or findItemString == itemString then
+			if findItemString == lib:GetItemID(itemString) or findItemString == itemString then
 				if not TSM.Util:IsSoulbound(bag, slot) then
 					num = num + select(2, GetContainerItemInfo(bag, slot))
 				end
@@ -308,11 +309,11 @@ function Post:GetNumInBags(itemString)
 		return num
 	end
 
-	local oldGems = TSMAPI:GetOldGems(TSMAPI:GetItemID(itemString))
+	local oldGems = lib:GetOldGems(lib:GetItemID(itemString))
 	if oldGems then
 		local num = 0
 		for _, gemItemID in ipairs(oldGems) do
-			local gemItemString = TSMAPI:GetItemString(gemItemID)
+			local gemItemString = lib:GetItemString(gemItemID)
 			num = num + GetItemBagCount(gemItemString)
 		end
 		return num
@@ -361,10 +362,10 @@ countFrame:SetScript("OnUpdate", function(self, elapsed)
 local function DelayFrame()
 	if not isScanning and #(postQueue) == 0 then
 		Post:Stop()
-		TSMAPI:CancelFrame("postDelayFrame")
+		lib:CancelFrame("postDelayFrame")
 	elseif #(postQueue) > 0 then
 		Post:UpdateItem()
-		TSMAPI:CancelFrame("postDelayFrame")
+		lib:CancelFrame("postDelayFrame")
 	end
 end
 
@@ -373,7 +374,7 @@ function Post:UpdateItem()
 	if #(postQueue) == 0 then
 		GUI.buttons:Disable()
 		if isScanning then
-			TSMAPI:CreateFunctionRepeat("postDelayFrame", DelayFrame)
+			lib:CreateFunctionRepeat("postDelayFrame", DelayFrame)
 		else
 			countFrame:Show()
 		end
@@ -396,7 +397,7 @@ function Post:DoAction()
 	end
 	
 	local containerItemLink = GetContainerItemLink(currentItem.bag, currentItem.slot)
-	if TSMAPI:GetItemID(containerItemLink) ~= currentItem.itemString and TSMAPI:GetItemString(containerItemLink) ~= currentItem.itemString then
+	if lib:GetItemID(containerItemLink) ~= currentItem.itemString and lib:GetItemString(containerItemLink) ~= currentItem.itemString then
 		TSM:Print(L["Please don't move items around in your bags while a post scan is running! The item was skipped to avoid an incorrect item being posted."])
 		timeout:Hide()
 		Post:SkipItem()
@@ -429,8 +430,8 @@ end
 
 function Post:Stop()
 	GUI:Stopped()
-	TSMAPI:CancelFrame("postDelayFrame")
-	TSMAPI:CancelFrame("updatePostStatus")
+	lib:CancelFrame("postDelayFrame")
+	lib:CancelFrame("updatePostStatus")
 	
 	Post:UnregisterAllEvents()
 	Post:UnregisterAllMessages()
@@ -450,7 +451,7 @@ function Post:GetAHGoldTotal()
 			incomingTotal = incomingTotal + buyoutAmount
 		end
 	end
-	return TSMAPI:FormatTextMoneyIcon(total), TSMAPI:FormatTextMoneyIcon(incomingTotal)
+	return lib:FormatTextMoneyIcon(total), lib:FormatTextMoneyIcon(incomingTotal)
 end
 
 function Post:GetStatus()
@@ -484,6 +485,6 @@ end
 function Post:ToggleScanning(value)
 	isScanning = value
 	if value then
-		TSMAPI.auctionMode = 'post'
+		lib.auctionMode = 'post'
 	end
 end

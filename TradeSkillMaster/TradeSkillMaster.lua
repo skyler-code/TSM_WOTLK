@@ -7,6 +7,7 @@ TSM = LibStub("AceAddon-3.0"):NewAddon(TSM, "TradeSkillMaster", "AceEvent-3.0", 
 local L = LibStub("AceLocale-3.0"):GetLocale("TradeSkillMaster") -- loads the localization table
 TSM.version = GetAddOnMetadata("TradeSkillMaster","X-Curse-Packaged-Version") or GetAddOnMetadata("TradeSkillMaster", "Version") -- current version of the addon
 TSM.versionKey = 2
+local random = math.random
 
 
 TSMAPI = {}
@@ -325,4 +326,13 @@ function lib:SetCacheTooltip(itemId)
 	if itemId then
 		scanTooltip:SetHyperlink("item:"..itemId..":0:0:0:0:0:0:0")
 	end
+end
+
+function lib:ShuffleTable(tbl)
+	local len = #tbl
+    for i = len, 2, -1 do
+        local j = random( 1, i );
+        tbl[i], tbl[j] = tbl[j], tbl[i];
+    end
+    return tbl;
 end

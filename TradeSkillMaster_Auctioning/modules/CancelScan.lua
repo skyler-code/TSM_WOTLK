@@ -9,13 +9,18 @@
 -- ------------------------------------------------------------------------------------- --
 
 
-local TSM = select(2, ...)
+local addonName, TSM = ...
+
 local Cancel = TSM:NewModule("Cancel", "AceEvent-3.0")
-local L = LibStub("AceLocale-3.0"):GetLocale("TradeSkillMaster_Auctioning") -- loads the localization table
+local L = LibStub("AceLocale-3.0"):GetLocale(addonName) -- loads the localization table
+
+local GetAuctionItemInfo, GetNumAuctionItems, GetAuctionItemLink, GetAuctionItemTimeLeft, CancelAuction =
+	GetAuctionItemInfo, GetNumAuctionItems, GetAuctionItemLink, GetAuctionItemTimeLeft, CancelAuction
 
 local cancelQueue, currentItem, tempIndexList, itemsToCancel = {}, {}, {}, {}
 local totalToCancel, totalCanceled, count = 0, 0, 0
 local isScanning, GUI, cancelError, isCancelAll
+local lib = TSMAPI
 
 function Cancel:GetScanListAndSetup(GUIRef, options)
 	-- setup stuff
@@ -33,18 +38,20 @@ function Cancel:GetScanListAndSetup(GUIRef, options)
 	
 	if options.cancelAll then
 		for i=GetNumAuctionItems("owner"), 1, -1 do
-			if select(13, GetAuctionItemInfo("owner", i)) == 0 and (not TSM.db.global.cancelWithBid or select(10, GetAuctionItemInfo("owner", i)) == 0) then
-				local itemString = TSMAPI:GetItemString(GetAuctionItemLink("owner", i))
+			local bidAmount, _, _, sold = select(10,GetAuctionItemInfo("owner", i))
+			if sold == 0 and (not TSM.db.global.cancelWithBid or bidAmount == 0) then
+				local itemString = lib:GetItemString(GetAuctionItemLink("owner", i))
 				itemsToCancel[itemString] = true
 				tempList[itemString] = true
 			end
 		end
 	elseif options.cancelDuration then
 		for i=GetNumAuctionItems("owner"), 1, -1 do
-			if select(13, GetAuctionItemInfo("owner", i)) == 0 and (not TSM.db.global.cancelWithBid or select(10, GetAuctionItemInfo("owner", i)) == 0) then
+			local bidAmount, _, _, sold = select(10,GetAuctionItemInfo("owner", i))
+			if sold == 0 and (not TSM.db.global.cancelWithBid or bidAmount == 0) then
 				local timeLeft = GetAuctionItemTimeLeft("owner", i)
 				if timeLeft <= TSM.db.global.lowDuration then
-					local itemString = TSMAPI:GetItemString(GetAuctionItemLink("owner", i))
+					local itemString = lib:GetItemString(GetAuctionItemLink("owner", i))
 					itemsToCancel[itemString] = true
 					tempList[itemString] = true
 				end
@@ -53,10 +60,11 @@ function Cancel:GetScanListAndSetup(GUIRef, options)
 		isCancelAll = TSM.db.global.lowDuration
 	elseif options.cancelFilter then
 		for i=GetNumAuctionItems("owner"), 1, -1 do
-			if select(13, GetAuctionItemInfo("owner", i)) == 0 and (not TSM.db.global.cancelWithBid or select(10, GetAuctionItemInfo("owner", i)) == 0) then
+			local bidAmount, _, _, sold = select(10,GetAuctionItemInfo("owner", i))
+			if sold == 0 and (not TSM.db.global.cancelWithBid or bidAmount == 0) then
 				local itemName = GetAuctionItemInfo("owner", i)
 				if strfind(strlower(itemName), strlower(options.cancelFilter)) then
-					local itemString = TSMAPI:GetItemString(GetAuctionItemLink("owner", i))
+					local itemString = lib:GetItemString(GetAuctionItemLink("owner", i))
 					itemsToCancel[itemString] = true
 					tempList[itemString] = true
 				end
@@ -65,9 +73,10 @@ function Cancel:GetScanListAndSetup(GUIRef, options)
 	else
 		-- Add a scan based on items in the AH that match
 		for i=GetNumAuctionItems("owner"), 1, -1 do
-			if select(13, GetAuctionItemInfo("owner", i)) == 0 then
-				local itemString = TSMAPI:GetItemString(GetAuctionItemLink("owner", i))
-				local itemID = TSMAPI:GetItemID(itemString)
+			local sold = select(13,GetAuctionItemInfo("owner", i))
+			if sold == 0 then
+				local itemString = lib:GetItemString(GetAuctionItemLink("owner", i))
+				local itemID = lib:GetItemID(itemString)
 				if TSM.itemReverseLookup[itemID] then
 					itemString = itemID
 				end
@@ -96,14 +105,14 @@ function Cancel:GetScanListAndSetup(GUIRef, options)
 		tinsert(scanList, itemString)
 	end
 	
-	return scanList
+	return lib:ShuffleTable(scanList)
 end
 
 function Cancel:ProcessItem(itemString, noLog)
 	local toCancel, reasonToCancel, reasonNotToCancel
 	for i=GetNumAuctionItems("owner"), 1, -1 do
 		local link = GetAuctionItemLink("owner", i)
-		if itemString == TSMAPI:GetItemString(link) or itemString == TSMAPI:GetItemID(link) then
+		if itemString == lib:GetItemString(link) or itemString == lib:GetItemID(link) then
 			local shouldCancel, reason = Cancel:ShouldCancel(i)
 			if shouldCancel then
 				toCancel = true
@@ -134,8 +143,8 @@ function Cancel:ShouldCancel(index)
 	local buyoutPerItem = floor(buyout / quantity)
 	local bidPerItem = floor(bid / quantity)
 	
-	local itemString = TSMAPI:GetItemString(GetAuctionItemLink("owner", index))
-	local itemID = TSMAPI:GetItemID(itemString)
+	local itemString = lib:GetItemString(GetAuctionItemLink("owner", index))
+	local itemID = lib:GetItemID(itemString)
 	if TSM.itemReverseLookup[itemID] then
 		itemString = itemID
 	end
@@ -240,18 +249,18 @@ end
 
 local function CountFrame()
 	if count == totalToCancel then
-		TSMAPI:CancelFrame("cancelCountFrame")
+		lib:CancelFrame("cancelCountFrame")
 		Cancel:Stop()
 	end
 end
 
 local function DelayFrame()
 	if not isScanning and #(cancelQueue) == 0 then
-		TSMAPI:CreateFunctionRepeat("cancelCountFrame", CountFrame)
-		TSMAPI:CancelFrame("cancelDelayFrame")
+		lib:CreateFunctionRepeat("cancelCountFrame", CountFrame)
+		lib:CancelFrame("cancelDelayFrame")
 	elseif #(cancelQueue) > 0 then
 		Cancel:UpdateItem()
-		TSMAPI:CancelFrame("cancelDelayFrame")
+		lib:CancelFrame("cancelDelayFrame")
 	end
 end
 
@@ -260,9 +269,9 @@ function Cancel:UpdateItem()
 	if #(cancelQueue) == 0 then
 		GUI.buttons:Disable()
 		if isScanning then
-			TSMAPI:CreateFunctionRepeat("cancelDelayFrame", DelayFrame)
+			lib:CreateFunctionRepeat("cancelDelayFrame", DelayFrame)
 		else
-			TSMAPI:CreateFunctionRepeat("cancelCountFrame", CountFrame)
+			lib:CreateFunctionRepeat("cancelCountFrame", CountFrame)
 		end
 		return
 	end
@@ -287,9 +296,9 @@ function Cancel:DoAction()
 	-- figure out which index the item goes to
 	for i=GetNumAuctionItems("owner"), 1, -1 do
 		local _, _, quantity, _, _, _, bid, _, buyout, activeBid = GetAuctionItemInfo("owner", i)
-		local itemString = TSMAPI:GetItemString(GetAuctionItemLink("owner", i))
+		local itemString = lib:GetItemString(GetAuctionItemLink("owner", i))
 		if type(currentItem.itemString) == "number" then
-			itemString = TSMAPI:GetItemID(itemString)
+			itemString = lib:GetItemID(itemString)
 		end
 		if itemString == currentItem.itemString and abs((buyout or 0) - (currentItem.buyout or 0)) < quantity and abs((bid or 0) - (currentItem.bid or 0)) < quantity and (not TSM.db.global.cancelWithBid and activeBid == 0 or TSM.db.global.cancelWithBid) then
 			if not tempIndexList[itemString..buyout..bid..i] then
@@ -327,9 +336,9 @@ function Cancel:Stop(interrupted)
 	wipe(tempIndexList)
 	if not cancelError or interrupted then
 		-- didn't get "item not found" for any cancels or we were interrupted so we are done
-		TSMAPI:CancelFrame("cancelCountFrame")
-		TSMAPI:CancelFrame("cancelDelayFrame")
-		TSMAPI:CancelFrame("updateCancelStatus")
+		lib:CancelFrame("cancelCountFrame")
+		lib:CancelFrame("cancelDelayFrame")
+		lib:CancelFrame("updateCancelStatus")
 		GUI:Stopped()
 	
 		Cancel:UnregisterAllEvents()
@@ -342,8 +351,8 @@ function Cancel:Stop(interrupted)
 		cancelError = nil
 		local tempList = {}
 		for i=GetNumAuctionItems("owner"), 1, -1 do
-			local itemString = TSMAPI:GetItemString(GetAuctionItemLink("owner", i))
-			local itemID = TSMAPI:GetItemID(itemString)
+			local itemString = lib:GetItemString(GetAuctionItemLink("owner", i))
+			local itemID = lib:GetItemID(itemString)
 			if not isCancelAll and TSM.itemReverseLookup[itemID] then
 				itemString = itemID
 			end
@@ -374,6 +383,6 @@ end
 function Cancel:ToggleScanning(value)
 	isScanning = value
 	if value then
-		TSMAPI.auctionMode = 'cancel'
+		lib.auctionMode = 'cancel'
 	end
 end
