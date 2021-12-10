@@ -10,6 +10,8 @@ local GetItemQualityColor, GetContainerNumSlots, GetItemInfo, IsEquippableItem, 
     GetItemQualityColor, GetContainerNumSlots, GetItemInfo, IsEquippableItem, GetContainerItemID, GetContainerItemLink
 local tinsert, strmatch, pairs, select = table.insert, strmatch, pairs, select
 
+local lib = TSMAPI
+
 de.dObj = {
     bag = 0,
     slot = 1,
@@ -45,6 +47,11 @@ end
 
 local function getFormattedItemStr(id)
     local name,_,quality = GetItemInfo(id)
+    if not name then
+        local itemId = tonumber(id) and id or strmatch(id, "item:(%d+):")
+        lib:SetCacheTooltip(itemId)
+        return id
+    end
     local color = ITEM_QUALITY_COLORS[quality]
     return color.hex..name.."|r"
 end
@@ -85,7 +92,7 @@ function de:getSafeTable()
             {
                 cols = {
                     {
-                        value = function(itemString, quality) 
+                        value = function(itemString) 
                             if itemString then
                                 return getFormattedItemStr(itemString) 
                             end 
